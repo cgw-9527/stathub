@@ -20,33 +20,34 @@
 package main
 
 import (
-	"fmt"
-	"github.com/likexian/host-stat-go"
-	"os/exec"
-	"strings"
-	"strconv"
 	"encoding/json"
+	"fmt"
+	"os/exec"
+	"strconv"
+	"strings"
+
+	hoststat "github.com/likexian/host-stat-go"
 )
 
 // Stat storing stat data
 type Stat struct {
-	Id        string  `json:"id"`//
-	OSRelease string  `json:"os_release"`//
-	Uptime    uint64  `json:"uptime"`//
-	Load      string  `json:"load"`//
-	CPURate   float64 `json:"cpu_rate"`//
-	MemRate   float64 `json:"mem_rate"`//
-	NetRead   uint64  `json:"net_read"`//
-	NetWrite  uint64  `json:"net_write"`//
-	TrxHash         string `json:"trx_hash"`
-	NodeStatus     string `json:"node_status"`
-	BlockNum       string `json:"block_num"`
-	ExpiryProducer string `json:"expiry_producer"`
-	IsselfProblock string `json:"isself_problock"`
+	Id             string  `json:"id"`         //
+	OSRelease      string  `json:"os_release"` //
+	Uptime         uint64  `json:"uptime"`     //
+	Load           string  `json:"load"`       //
+	CPURate        float64 `json:"cpu_rate"`   //
+	MemRate        float64 `json:"mem_rate"`   //
+	NetRead        uint64  `json:"net_read"`   //
+	NetWrite       uint64  `json:"net_write"`  //
+	TrxHash        string  `json:"trx_hash"`
+	NodeStatus     string  `json:"node_status"`
+	BlockNum       string  `json:"block_num"`
+	ExpiryProducer string  `json:"expiry_producer"`
+	IsselfProblock string  `json:"isself_problock"`
 }
 
 type MasterNode struct {
-	TrxHash         string
+	TrxHash        string
 	NodeStatus     string
 	Id             string
 	BlockNum       string
@@ -57,7 +58,8 @@ type Produce struct {
 	Height    int `json:"height:"`
 	Produceno int `json:"produceno:"`
 }
-func getMasterNodeList()[]MasterNode {
+
+func getMasterNodeList() []MasterNode {
 	var masterNode MasterNode
 	var produce Produce
 	var masterNodeList []MasterNode
@@ -97,6 +99,7 @@ func getMasterNodeList()[]MasterNode {
 	}
 	return masterNodeList
 }
+
 // GetStat return stat data
 func GetStat(id string, name string) Stat {
 
@@ -110,7 +113,6 @@ func GetStat(id string, name string) Stat {
 	if err != nil {
 		SERVER_LOGGER.ErrorOnce("get cpu info failed: %s", err.Error())
 	}
-
 
 	cpuStat, err := hoststat.GetCPUStat()
 	if err != nil {
