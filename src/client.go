@@ -44,6 +44,7 @@ func statSend() {
 		stat.ExpiryProducer = v.ExpiryProducer
 		stat.NodeStatus = v.NodeStatus
 		stat.BlockNum = v.BlockNum
+		stat.TrxHash = v.TrxHash
 		//将结构体数据转为string
 		data := simplejson.New(stat)
 		result, err := data.Dumps()
