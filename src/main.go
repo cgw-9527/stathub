@@ -168,7 +168,7 @@ func main() {
 
 	SERVER_LOGGER.Info("server start at %d", SERVER_START)
 	if SERVER_CONFIG.Role == "server" {
-		go StatService()
+		// go StatService()
 		HttpService()
 	} else {
 		StatService()

@@ -20,14 +20,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/likexian/simplejson-go"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/likexian/simplejson-go"
 )
 
 // HttpService start http service
@@ -301,6 +303,7 @@ func apiNodeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func apiStatHandler(w http.ResponseWriter, r *http.Request) {
+	var stat Stat
 	ip := getHTTPHeader(r, "X-Real-Ip")
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
@@ -320,34 +323,43 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	text := string(body)
-	serverKey := Md5(SERVER_CONFIG.ServerKey, text)
-	if serverKey != clientKey {
-		result := `{"status": {"code": 0, "message": "key invalid"}}`
+	// text := string(body)
+	json.Unmarshal(body, &stat)
+	fmt.Println(stat)
+	if body == nil {
+		result := `{"status": {"code": 0, "message": "数据为空"}}`
 		fmt.Fprintf(w, result)
 		return
 	}
-
-	data, err := simplejson.Loads(text)
-	if err != nil {
-		result := `{"status": {"code": 0, "message": "body invalid"}}`
-		fmt.Fprintf(w, result)
-		return
-	}
-
-	data.Set("ip", ip)
-	name, _ := data.Get("host_name").String()
-	data.Set("host_name", strings.Split(name, ".")[0])
-
-	err = WriteStatus(SERVER_CONFIG.DataDir, data)
-	if err != nil {
-		result := `{"status": {"code": 0, "message": "` + err.Error() + `"}}`
-		fmt.Fprintf(w, result)
-		return
-	}
-
 	result := `{"status": {"code": 1, "message": "ok"}}`
 	fmt.Fprintf(w, result)
+	// serverKey := Md5(SERVER_CONFIG.ServerKey, text)
+	// if serverKey != clientKey {
+	// 	result := `{"status": {"code": 0, "message": "key invalid"}}`
+	// 	fmt.Fprintf(w, result)
+	// 	return
+	// }
+
+	// data, err := simplejson.Loads(text)
+	// if err != nil {
+	// 	result := `{"status": {"code": 0, "message": "body invalid"}}`
+	// 	fmt.Fprintf(w, result)
+	// 	return
+	// }
+
+	// data.Set("ip", ip)
+	// name, _ := data.Get("host_name").String()
+	// data.Set("host_name", strings.Split(name, ".")[0])
+
+	// err = WriteStatus(SERVER_CONFIG.DataDir, data)
+	// if err != nil {
+	// 	result := `{"status": {"code": 0, "message": "` + err.Error() + `"}}`
+	// 	fmt.Fprintf(w, result)
+	// 	return
+	// }
+
+	// result := `{"status": {"code": 1, "message": "ok"}}`
+	// fmt.Fprintf(w, result)
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
