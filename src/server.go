@@ -23,14 +23,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 	"text/template"
 	"time"
 
+	"github.com/go-xorm/xorm"
 	"github.com/likexian/simplejson-go"
 )
+
+type Statmysql struct {
+	Id             string  `xorm:"not null pk comment('主节点索引') INT(11)"`
+	CpuRate        float64 `xorm:"not null comment('cpu利用率') FLOAT"`
+	Raw            float64 `xorm:"not null comment('内存利用率') FLOAT"`
+	NetRate        string  `xorm:"not null comment('网络带宽（net i/o）') VARCHAR(255)"`
+	System         string  `xorm:"not null comment('操作系统') VARCHAR(255)"`
+	Load           string  `xorm:"not null comment('机器负载') INT(11)"`
+	OnlineTime     string  `xorm:"not null comment('在线时长') INT(11)"`
+	BlockNum       string  `xorm:"not null comment('区块高度') INT(11)"`
+	NodeStatus     string  `xorm:"not null comment('主节点状态') INT(11)"`
+	ExpiryProducer string  `xorm:"not null comment('主节点证书到期时间') INT(11)"`
+	IsselfProblock string  `xorm:"not null comment('是否自己出块') VARCHAR(255)"`
+	TrxHash        string  `xorm:"not null comment('主节点交易hash') VARCHAR(255)"`
+}
 
 // HttpService start http service
 func HttpService() {
@@ -304,6 +321,7 @@ func apiNodeHandler(w http.ResponseWriter, r *http.Request) {
 
 func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 	var stat Stat
+	var statMysql Statmysql
 	ip := getHTTPHeader(r, "X-Real-Ip")
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
@@ -325,7 +343,23 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	// text := string(body)
 	json.Unmarshal(body, &stat)
-	fmt.Println(stat)
+	if stat.Id != "" {
+		statMysql.Id = stat.Id
+		statMysql.CpuRate = stat.CPURate
+		statMysql.Raw = stat.MemRate
+		statMysql.NetRate = string(stat.NetRead / stat.NetWrite)
+		statMysql.System = stat.OSRelease
+		statMysql.Load = stat.Load
+		statMysql.OnlineTime = string(stat.Uptime)
+		statMysql.BlockNum = stat.BlockNum
+		statMysql.NodeStatus = stat.NodeStatus
+		statMysql.ExpiryProducer = stat.ExpiryProducer
+		statMysql.IsselfProblock = stat.IsselfProblock
+		statMysql.TrxHash = stat.TrxHash
+		engine := getEngine()
+		defer engine.Close()
+		engine.Insert(statMysql)
+	}
 	if body == nil {
 		result := `{"status": {"code": 0, "message": "数据为空"}}`
 		fmt.Fprintf(w, result)
@@ -333,33 +367,6 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	result := `{"status": {"code": 1, "message": "ok"}}`
 	fmt.Fprintf(w, result)
-	// serverKey := Md5(SERVER_CONFIG.ServerKey, text)
-	// if serverKey != clientKey {
-	// 	result := `{"status": {"code": 0, "message": "key invalid"}}`
-	// 	fmt.Fprintf(w, result)
-	// 	return
-	// }
-
-	// data, err := simplejson.Loads(text)
-	// if err != nil {
-	// 	result := `{"status": {"code": 0, "message": "body invalid"}}`
-	// 	fmt.Fprintf(w, result)
-	// 	return
-	// }
-
-	// data.Set("ip", ip)
-	// name, _ := data.Get("host_name").String()
-	// data.Set("host_name", strings.Split(name, ".")[0])
-
-	// err = WriteStatus(SERVER_CONFIG.DataDir, data)
-	// if err != nil {
-	// 	result := `{"status": {"code": 0, "message": "` + err.Error() + `"}}`
-	// 	fmt.Fprintf(w, result)
-	// 	return
-	// }
-
-	// result := `{"status": {"code": 1, "message": "ok"}}`
-	// fmt.Fprintf(w, result)
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
@@ -437,4 +444,14 @@ func isRobots(w http.ResponseWriter, r *http.Request) bool {
 	}
 
 	return false
+}
+
+//获取engine对象
+func getEngine() *xorm.Engine {
+	engine, err := xorm.NewEngine("mysql", "root:123456@tcp(127.0.0.1:3306)/data?parseTime=true")
+	if err != nil {
+		log.Println("生成engine对象失败", err)
+		panic(err)
+	}
+	return engine
 }
