@@ -28,7 +28,7 @@ import (
 func StatService() {
 	SERVER_LOGGER.Info("start stat service")
 	go statSend()
-	t := time.NewTicker(60 * time.Second)
+	t := time.NewTicker(300 * time.Second)
 	for range t.C {
 		go statSend()
 	}

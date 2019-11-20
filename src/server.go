@@ -30,6 +30,7 @@ import (
 	"text/template"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/xorm"
 	"github.com/likexian/simplejson-go"
 )
@@ -40,7 +41,21 @@ type Statmysql struct {
 	Raw            float64 `xorm:"not null comment('内存利用率') FLOAT"`
 	NetRate        string  `xorm:"not null comment('网络带宽（net i/o）') VARCHAR(255)"`
 	System         string  `xorm:"not null comment('操作系统') VARCHAR(255)"`
-	Load           string  `xorm:"not null comment('机器负载') INT(11)"`
+	Load           string  `xorm:"not null comment('机器负载') VARCHAR(255)"`
+	OnlineTime     string  `xorm:"not null comment('在线时长') INT(11)"`
+	BlockNum       string  `xorm:"not null comment('区块高度') INT(11)"`
+	NodeStatus     string  `xorm:"not null comment('主节点状态') INT(11)"`
+	ExpiryProducer string  `xorm:"not null comment('主节点证书到期时间') INT(11)"`
+	IsselfProblock string  `xorm:"not null comment('是否自己出块') VARCHAR(255)"`
+	TrxHash        string  `xorm:"not null comment('主节点交易hash') VARCHAR(255)"`
+}
+type Updatestat struct {
+	Id             string  `xorm:"not null pk comment('主节点索引') INT(11)"`
+	CpuRate        float64 `xorm:"not null comment('cpu利用率') FLOAT"`
+	Raw            float64 `xorm:"not null comment('内存利用率') FLOAT"`
+	NetRate        string  `xorm:"not null comment('网络带宽（net i/o）') VARCHAR(255)"`
+	System         string  `xorm:"not null comment('操作系统') VARCHAR(255)"`
+	Load           string  `xorm:"not null comment('机器负载') VARCHAR(255)"`
 	OnlineTime     string  `xorm:"not null comment('在线时长') INT(11)"`
 	BlockNum       string  `xorm:"not null comment('区块高度') INT(11)"`
 	NodeStatus     string  `xorm:"not null comment('主节点状态') INT(11)"`
@@ -322,6 +337,7 @@ func apiNodeHandler(w http.ResponseWriter, r *http.Request) {
 func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 	var stat Stat
 	var statMysql Statmysql
+	var updateStat Updatestat
 	ip := getHTTPHeader(r, "X-Real-Ip")
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
@@ -344,21 +360,58 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 	// text := string(body)
 	json.Unmarshal(body, &stat)
 	if stat.Id != "" {
+		//保存数据
 		statMysql.Id = stat.Id
 		statMysql.CpuRate = stat.CPURate
 		statMysql.Raw = stat.MemRate
-		statMysql.NetRate = string(stat.NetRead / stat.NetWrite)
+		statMysql.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
 		statMysql.System = stat.OSRelease
 		statMysql.Load = stat.Load
-		statMysql.OnlineTime = string(stat.Uptime)
+		statMysql.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
 		statMysql.BlockNum = stat.BlockNum
 		statMysql.NodeStatus = stat.NodeStatus
 		statMysql.ExpiryProducer = stat.ExpiryProducer
 		statMysql.IsselfProblock = stat.IsselfProblock
 		statMysql.TrxHash = stat.TrxHash
+
 		engine := getEngine()
 		defer engine.Close()
-		engine.Insert(statMysql)
+		_, err := engine.Insert(statMysql)
+		if err != nil {
+			log.Println(err)
+			engine.Insert(statMysql)
+		}
+		//更新数据
+		updateStat.Id = stat.Id
+		updateStat.CpuRate = stat.CPURate
+		updateStat.Raw = stat.MemRate
+		updateStat.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
+		updateStat.System = stat.OSRelease
+		updateStat.Load = stat.Load
+		updateStat.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
+		updateStat.BlockNum = stat.BlockNum
+		updateStat.NodeStatus = stat.NodeStatus
+		updateStat.ExpiryProducer = stat.ExpiryProducer
+		updateStat.IsselfProblock = stat.IsselfProblock
+		updateStat.TrxHash = stat.TrxHash
+		result, err := engine.QueryString("select * from updatestat;")
+		if err != nil {
+			log.Println(err)
+			result, _ = engine.QueryString("select * from updatestat;")
+		}
+		if result != nil {
+			_, err := engine.Id(stat.Id).Update(updateStat)
+			if err != nil {
+				log.Println(err)
+				engine.Id(stat.Id).Update(updateStat)
+			}
+		} else {
+			_, err := engine.Insert(updateStat)
+			if err != nil {
+				log.Println(err)
+				engine.Insert(updateStat)
+			}
+		}
 	}
 	if body == nil {
 		result := `{"status": {"code": 0, "message": "数据为空"}}`

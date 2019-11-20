@@ -6,21 +6,10 @@ PIDFILE="log/stathub.pid"
 cd $BASEDIR
 
 start() {
-    echo "starting"
-    if [ ! -f $PIDFILE ]; then
-        ./stathub -c conf/stathub.conf
-        echo "ok"
-        echo "----------------------------------------------------"
-        echo "| Please open the below URL on your PC browser:    |"
-        echo "| https://this-server-ip:15944                     |"
-        echo "| Default password: likexian                       |"
-        echo "|                                                  |"
-        echo "| Feedback: https://github.com/likexian/stathub-go |"
-        echo "| Thank you for your using, By Li Kexian           |"
-        echo "| StatHub, Apache License, Version 2.0             |"
-        echo "----------------------------------------------------"
-    fi
+        echo "starting"
+        $sudo nohup ./stathub -c conf/stathub.conf &
 }
+exit 1
 
 stop() {
     echo "stopping"
