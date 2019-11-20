@@ -1,5 +1,4 @@
 #!/bin/bash
-
 BASEDIR="/usr/local/stathub"
 PIDFILE="log/stathub.pid"
 
@@ -7,9 +6,9 @@ cd $BASEDIR
 
 start() {
         echo "starting"
-        $sudo nohup ./stathub -c conf/stathub.conf &
+        cd $BASEDIR
+        $sudo nohup ./stathub -c conf/stathub.conf & \Enter
 }
-exit 1
 
 stop() {
     echo "stopping"
@@ -22,8 +21,7 @@ stop() {
 
 case "$1" in
     start)
-        start
-        ;;
+        start ;;
     stop)
         stop
         ;;

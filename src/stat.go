@@ -56,7 +56,7 @@ type MasterNode struct {
 }
 type Produce struct {
 	Height    int `json:"height:"`
-	Produceno int `json:"produceno:"`
+	Produceno int `json:"producer:"`
 }
 
 func getMasterNodeList() []MasterNode {

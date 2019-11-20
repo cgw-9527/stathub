@@ -394,10 +394,10 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 		updateStat.ExpiryProducer = stat.ExpiryProducer
 		updateStat.IsselfProblock = stat.IsselfProblock
 		updateStat.TrxHash = stat.TrxHash
-		result, err := engine.QueryString("select * from updatestat;")
+		result, err := engine.QueryString("select * from updatestat where id=?;", stat.Id)
 		if err != nil {
 			log.Println(err)
-			result, _ = engine.QueryString("select * from updatestat;")
+			result, _ = engine.QueryString("select * from updatestat where id=?;", stat.Id)
 		}
 		if result != nil {
 			_, err := engine.Id(stat.Id).Update(updateStat)
