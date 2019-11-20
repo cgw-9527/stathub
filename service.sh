@@ -7,7 +7,7 @@ cd $BASEDIR
 start() {
         echo "starting"
         cd $BASEDIR
-        $sudo nohup ./stathub -c conf/stathub.conf & \Enter
+        $sudo nohup ./stathub -c conf/stathub.conf & \Entsdaer
 }
 
 stop() {
