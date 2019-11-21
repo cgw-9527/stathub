@@ -20,7 +20,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -66,9 +65,9 @@ type Updatestat struct {
 
 // HttpService start http service
 func HttpService() {
-	http.HandleFunc("/api/stat", apiStatHandler)
-	http.HandleFunc("/getMasterNodeByIndex", getMasterNodeByIndex)
-	http.HandleFunc("/getMasterNode", getMasterNode)
+	http.HandleFunc("/api/stat", apiStatHandler12)
+	//http.HandleFunc("/getMasterNodeByIndex", getMasterNodeByIndex)
+	//	http.HandleFunc("/getMasterNode", getMasterNode)
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
@@ -130,10 +129,10 @@ func getMasterNodeByIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func apiStatHandler(w http.ResponseWriter, r *http.Request) {
-	var stat Stat
-	var statMysql Statmysql
-	var updateStat Updatestat
+func apiStatHandler12(w http.ResponseWriter, r *http.Request) {
+	// var stat Stat
+	// var statMysql Statmysql
+	// var updateStat Updatestat
 	ip := getHTTPHeader(r, "X-Real-Ip")
 	if ip == "" {
 		ip = strings.Split(r.RemoteAddr, ":")[0]
@@ -141,7 +140,7 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 
 	clientKey := getHTTPHeader(r, "X-Client-Key")
 	if clientKey == "" {
-		result := `{"status": {"code": 0, "message": "key invalid"}}`
+		result := `{"status": {"code": 0, "message": "key X-Client-Key invalid"}}`
 		fmt.Fprintf(w, result)
 		return
 	}
@@ -152,70 +151,75 @@ func apiStatHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, result)
 		return
 	}
-
-	// text := string(body)
-	json.Unmarshal(body, &stat)
-	if stat.Id != "" {
-		//保存数据
-		statMysql.Id = stat.Id
-		statMysql.CpuRate = stat.CPURate
-		statMysql.Raw = stat.MemRate
-		statMysql.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
-		statMysql.System = stat.OSRelease
-		statMysql.Load = stat.Load
-		statMysql.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
-		statMysql.BlockNum = stat.BlockNum
-		statMysql.NodeStatus = stat.NodeStatus
-		statMysql.ExpiryProducer = stat.ExpiryProducer
-		statMysql.IsselfProblock = stat.IsselfProblock
-		statMysql.TrxHash = stat.TrxHash
-
-		engine := getEngine()
-		defer engine.Close()
-		_, err := engine.Insert(statMysql)
-		if err != nil {
-			log.Println(err)
-			engine.Insert(statMysql)
-		}
-		//更新数据
-		updateStat.Id = stat.Id
-		updateStat.CpuRate = stat.CPURate
-		updateStat.Raw = stat.MemRate
-		updateStat.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
-		updateStat.System = stat.OSRelease
-		updateStat.Load = stat.Load
-		updateStat.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
-		updateStat.BlockNum = stat.BlockNum
-		updateStat.NodeStatus = stat.NodeStatus
-		updateStat.ExpiryProducer = stat.ExpiryProducer
-		updateStat.IsselfProblock = stat.IsselfProblock
-		updateStat.TrxHash = stat.TrxHash
-		result, err := engine.QueryString("select * from updatestat where id=?;", stat.Id)
-		if err != nil {
-			log.Println(err)
-			result, _ = engine.QueryString("select * from updatestat where id=?;", stat.Id)
-		}
-		if result != nil {
-			_, err := engine.Id(stat.Id).Update(updateStat)
-			if err != nil {
-				log.Println(err)
-				engine.Id(stat.Id).Update(updateStat)
-			}
-		} else {
-			_, err := engine.Insert(updateStat)
-			if err != nil {
-				log.Println(err)
-				engine.Insert(updateStat)
-			}
-		}
-	}
-	if body == nil {
-		result := `{"status": {"code": 0, "message": "数据为空"}}`
+	serverKey := Md5(SERVER_CONFIG.ServerKey, string(body))
+	if serverKey != clientKey {
+		result := `{"status": {"code": 0, "message": "key invalid"}}`
 		fmt.Fprintf(w, result)
 		return
 	}
-	result := `{"status": {"code": 1, "message": "ok"}}`
-	fmt.Fprintf(w, result)
+	// text := string(body)
+	// json.Unmarshal(body, &stat)
+	// if stat.Id != "" {
+	// 	//保存数据
+	// 	statMysql.Id = stat.Id
+	// 	statMysql.CpuRate = stat.CPURate
+	// 	statMysql.Raw = stat.MemRate
+	// 	statMysql.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
+	// 	statMysql.System = stat.OSRelease
+	// 	statMysql.Load = stat.Load
+	// 	statMysql.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
+	// 	statMysql.BlockNum = stat.BlockNum
+	// 	statMysql.NodeStatus = stat.NodeStatus
+	// 	statMysql.ExpiryProducer = stat.ExpiryProducer
+	// 	statMysql.IsselfProblock = stat.IsselfProblock
+	// 	statMysql.TrxHash = stat.TrxHash
+
+	// 	engine := getEngine()
+	// 	defer engine.Close()
+	// 	_, err := engine.Insert(statMysql)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		engine.Insert(statMysql)
+	// 	}
+	// 	//更新数据
+	// 	updateStat.Id = stat.Id
+	// 	updateStat.CpuRate = stat.CPURate
+	// 	updateStat.Raw = stat.MemRate
+	// 	updateStat.NetRate = fmt.Sprintf("%v / %v", stat.NetRead, stat.NetWrite)
+	// 	updateStat.System = stat.OSRelease
+	// 	updateStat.Load = stat.Load
+	// 	updateStat.OnlineTime = fmt.Sprintf("%v", stat.Uptime)
+	// 	updateStat.BlockNum = stat.BlockNum
+	// 	updateStat.NodeStatus = stat.NodeStatus
+	// 	updateStat.ExpiryProducer = stat.ExpiryProducer
+	// 	updateStat.IsselfProblock = stat.IsselfProblock
+	// 	updateStat.TrxHash = stat.TrxHash
+	// 	result, err := engine.QueryString("select * from updatestat where id=?;", stat.Id)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		result, _ = engine.QueryString("select * from updatestat where id=?;", stat.Id)
+	// 	}
+	// 	if result != nil {
+	// 		_, err := engine.Id(stat.Id).Update(updateStat)
+	// 		if err != nil {
+	// 			log.Println(err)
+	// 			engine.Id(stat.Id).Update(updateStat)
+	// 		}
+	// 	} else {
+	// 		_, err := engine.Insert(updateStat)
+	// 		if err != nil {
+	// 			log.Println(err)
+	// 			engine.Insert(updateStat)
+	// 		}
+	// 	}
+	// }
+	// if body == nil {
+	// 	result := `{"status": {"code": 0, "message": "数据为空"}}`
+	// 	fmt.Fprintf(w, result)
+	// 	return
+	// }
+	// result := `{"status": {"code": 1, "message": "ok"}}`
+	// fmt.Fprintf(w, result)
 }
 
 func getHTTPHeader(r *http.Request, name string) string {
