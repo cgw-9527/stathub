@@ -4,13 +4,6 @@ STATHUB_URL="http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/"
 
 BASEDIR="/usr/local/stathub"
 
-[ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
-id -u nobody >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    $sudo groupadd nogroup
-    useradd -g nogroup nobody -s /bin/false
-fi
-
 $sudo mkdir -p $BASEDIR
 $sudo chown -R $(id -u -n):$(id -g -n) $BASEDIR
 if [ ! -d $BASEDIR ]; then
