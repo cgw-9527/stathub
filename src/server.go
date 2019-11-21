@@ -88,7 +88,7 @@ func getMasterNode(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, result)
 		return
 	} else {
-		result := `{"status": {"code": 0, "data":?}}`
+		result := `{"status": {"code": 0, "data":%v}}`
 		fmt.Fprintf(w, result, data)
 		return
 	}
@@ -111,7 +111,7 @@ func getMasterNodeByIndex(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, result)
 		return
 	} else {
-		result := `{"status": {"code": 0, "data":?}}`
+		result := `{"status": {"code": 0, "data":%v}}`
 		fmt.Fprintf(w, result, data)
 		return
 	}

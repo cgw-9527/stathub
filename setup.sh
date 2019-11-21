@@ -1,7 +1,6 @@
 #!/bin/bash
 
-VERSION="0.102.3"
-STATHUB_URL="https://github.com/likexian/stathub-go/releases/download/v${VERSION}"
+STATHUB_URL="http://uosio.org:33012/chenguowen/stathub/master/"
 
 BASEDIR="/usr/local/stathub"
 
@@ -24,33 +23,33 @@ command_exists() {
     type "$1" &> /dev/null
 }
 
-for i in "i686" "x86_64"; do
+for i in "i686"; do
     if command_exists wget; then
-        wget --no-check-certificate "$STATHUB_URL/stathub.$i.tar.gz"
+        wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
     elif command_exists curl; then
-        curl --insecure -O "$STATHUB_URL/stathub.$i.tar.gz"
+        curl --insecure -O "$STATHUB_URL/stathub.$i.zip"
     else
         echo "Unable to find curl or wget, Please install it and try again."
         exit 1
     fi
 done
 
-if [ ! -f stathub.$(uname -m).tar.gz ]; then
+if [ ! -f stathub.i686.zip ]; then
     echo "Unable to get server file, Please manual download it"
     exit 1
 fi
 
-tar zxf stathub.$(uname -m).tar.gz
+tar zxf stathub.i686.zip
 chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
 $sudo mkdir $BASEDIR/pkgs
-mv stathub.*.tar.gz $BASEDIR/pkgs
+mv stathub.*.zip $BASEDIR/pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
-    $sudo sh -c "echo \"cd $BASEDIR; rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
+    $sudo sh -c "echo \"cd $BASEDIR;sudo rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
 fi
 
 echo "----------------------------------------------------"
