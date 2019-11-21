@@ -40,14 +40,14 @@ if [ ! -f stathub.$(uname -m).tar.gz ]; then
     exit 1
 fi
 
-tar zxf stathub.$(uname -m).tar.gz
-chmod +x stathub service
+$sudo tar zxf stathub.$(uname -m).tar.gz
+$sudo chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
 $sudo mkdir $BASEDIR/pkgs
-mv stathub.*.tar.gz $BASEDIR/pkgs
+$sudo mv stathub.*.tar.gz $BASEDIR/pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
     $sudo sh -c "echo \"cd $BASEDIR; rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
