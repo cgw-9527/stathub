@@ -1,27 +1,18 @@
 #!/bin/bash
-
+echo "start--------------"
 STATHUB_URL="http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/"
 
 BASEDIR="/usr/local/stathub"
 
-[ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
-id -u nobody >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    $sudo groupadd nogroup
-    useradd -g nogroup nobody -s /bin/false
-fi
-
 $sudo mkdir -p $BASEDIR
+echo "after mkdir"
 $sudo chown -R $(id -u -n):$(id -g -n) $BASEDIR
+echo "after chwon"
 if [ ! -d $BASEDIR ]; then
     echo "Unable to create dir $BASEDIR and chown to current user, Please manual do it"
     exit 1
 fi
 cd $BASEDIR
-
-command_exists() {
-    type "$1" &> /dev/null
-}
 
 for i in "i686"; do
     if command_exists wget; then
