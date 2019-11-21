@@ -12,44 +12,44 @@ if [ $? -ne 0 ]; then
 fi
 
 $sudo mkdir -p $BASEDIR
-echo "after mkdir"
 $sudo chown -R $(id -u -n):$(id -g -n) $BASEDIR
-echo "after chwon"
 if [ ! -d $BASEDIR ]; then
     echo "Unable to create dir $BASEDIR and chown to current user, Please manual do it"
     exit 1
 fi
 cd $BASEDIR
+
 command_exists() {
     type "$1" &> /dev/null
 }
-for i in "i686"; do
+
+for i in "i686" "x86_64"; do
     if command_exists wget; then
-      $sudo  wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
+        wget --no-check-certificate "$STATHUB_URL/stathub.$i.tar.gz"
     elif command_exists curl; then
-     $sudo   curl --insecure -O "$STATHUB_URL/stathub.$i.zip"
+        curl --insecure -O "$STATHUB_URL/stathub.$i.tar.gz"
     else
         echo "Unable to find curl or wget, Please install it and try again."
         exit 1
     fi
 done
 
-if [ ! -f stathub.i686.tar.gz ]; then
+if [ ! -f stathub.$(uname -m).tar.gz ]; then
     echo "Unable to get server file, Please manual download it"
     exit 1
 fi
 
-$sudo tar zxf stathub.i686.tar.gz
-$sudo chmod +x stathub service
+tar zxf stathub.$(uname -m).tar.gz
+chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
 $sudo mkdir $BASEDIR/pkgs
-$sudo mv stathub.*.zip $BASEDIR/pkgs
+mv stathub.*.tar.gz $BASEDIR/pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
-    $sudo sh -c "echo \"cd $BASEDIR;sudo rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
+    $sudo sh -c "echo \"cd $BASEDIR; rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
 fi
 
 echo "----------------------------------------------------"
