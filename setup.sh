@@ -5,7 +5,9 @@ STATHUB_URL="http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/"
 BASEDIR="/usr/local/stathub"
 
 $sudo mkdir -p $BASEDIR
+echo "after mkdir"
 $sudo chown -R $(id -u -n):$(id -g -n) $BASEDIR
+echo "after chwon"
 if [ ! -d $BASEDIR ]; then
     echo "Unable to create dir $BASEDIR and chown to current user, Please manual do it"
     exit 1
