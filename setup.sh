@@ -4,6 +4,13 @@ STATHUB_URL="https://github.com/cgw-9527/stathub/blob/master/"
 
 BASEDIR="/usr/local/stathub"
 
+[ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
+id -u nobody >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    $sudo groupadd nogroup
+    useradd -g nogroup nobody -s /bin/false
+fi
+
 $sudo mkdir -p $BASEDIR
 echo "after mkdir"
 $sudo chown -R $(id -u -n):$(id -g -n) $BASEDIR
@@ -13,7 +20,9 @@ if [ ! -d $BASEDIR ]; then
     exit 1
 fi
 cd $BASEDIR
-
+command_exists() {
+    type "$1" &> /dev/null
+}
 for i in "i686"; do
     if command_exists wget; then
       $sudo  wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
