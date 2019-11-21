@@ -46,7 +46,7 @@ if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
 $sudo mkdir $BASEDIR/pkgs
-mv stathub.*.tar $BASEDIR/pkgs
+sudo mv stathub.*.tar $BASEDIR/pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
     $sudo sh -c "echo \"cd $BASEDIR; rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
