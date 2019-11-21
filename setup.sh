@@ -1,5 +1,5 @@
-
-
+#!/bin/bash
+echo "start--------------"
 STATHUB_URL="http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/"
 
 BASEDIR="/usr/local/stathub"
