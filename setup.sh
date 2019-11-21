@@ -39,7 +39,7 @@ if [ ! -f stathub.i686.zip ]; then
     exit 1
 fi
 
-tar zxf stathub.i686.zip
+unzip stathub.i686.zip
 chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
