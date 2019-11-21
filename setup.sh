@@ -12,10 +12,6 @@ if [ ! -d $BASEDIR ]; then
 fi
 cd $BASEDIR
 
-command_exists() {
-    type "$1" &> /dev/null
-}
-
 for i in "i686"; do
     if command_exists wget; then
         wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
@@ -32,7 +28,7 @@ if [ ! -f stathub.i686.zip ]; then
     exit 1
 fi
 
-tar zxf stathub.i686.zip
+unzip stathub.i686.zip
 chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
