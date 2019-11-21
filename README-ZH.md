@@ -34,11 +34,11 @@ Stat Hub 是一个帮您收集并展示众多服务器状态的服务。
 
 ### Linux (如果有curl)
 
-    curl --insecure http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/setup.sh | sh
+    curl --insecure http://code.tianhecloud.com:33012/chenguowen/stathub/raw/master/setup.sh | sh
 
 ### Linux (如果有wget)
 
-    wget --no-check-certificate -O - http://code.tianhecloud.com:33012/chenguowen/stathub/src/master/setup.sh | sh
+    wget --no-check-certificate -O - http://code.tianhecloud.com:33012/chenguowen/stathub/raw/master/setup.sh | sh
 
 ### 在您电脑的浏览器打开它
 
