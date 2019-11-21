@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "start--------------"
+
 STATHUB_URL="https://github.com/cgw-9527/stathub/blob/master/"
 
 BASEDIR="/usr/local/stathub"
@@ -16,28 +16,28 @@ cd $BASEDIR
 
 for i in "i686"; do
     if command_exists wget; then
-        wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
+      $sudo  wget --no-check-certificate "$STATHUB_URL/stathub.$i.zip"
     elif command_exists curl; then
-        curl --insecure -O "$STATHUB_URL/stathub.$i.zip"
+     $sudo   curl --insecure -O "$STATHUB_URL/stathub.$i.zip"
     else
         echo "Unable to find curl or wget, Please install it and try again."
         exit 1
     fi
 done
 
-if [ ! -f stathub.i686.zip ]; then
+if [ ! -f stathub.i686.tar.gz ]; then
     echo "Unable to get server file, Please manual download it"
     exit 1
 fi
 
-unzip stathub.i686.zip
-chmod +x stathub service
+$sudo tar zxf stathub.i686.tar.gz
+$sudo chmod +x stathub service
 [ ! -d conf ] && $sudo mkdir $BASEDIR/conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
 $sudo mkdir $BASEDIR/pkgs
-mv stathub.*.zip $BASEDIR/pkgs
+$sudo mv stathub.*.zip $BASEDIR/pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
     $sudo sh -c "echo \"cd $BASEDIR;sudo rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
