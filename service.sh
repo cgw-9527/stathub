@@ -1,5 +1,5 @@
 #!/bin/bash
-BASEDIR="/usr/local/stathub"
+BASEDIR="/stathub"
 PIDFILE="log/stathub.pid"
 
 cd $BASEDIR

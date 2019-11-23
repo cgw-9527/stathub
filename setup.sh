@@ -3,7 +3,7 @@
 VERSION="1.0"
 STATHUB_URL="https://github.com/cgw-9527/stathub/releases/download/v${VERSION}"
 
-BASEDIR="/usr/local/stathub"
+BASEDIR="/stathub"
 
 [ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
 id -u nobody >/dev/null 2>&1
