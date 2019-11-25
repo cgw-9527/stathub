@@ -1,12 +1,8 @@
 #!/bin/bash
-BASEDIR="/stathub"
 PIDFILE="log/stathub.pid"
-
-cd $BASEDIR
 
 start() {
         echo "starting"
-        cd $BASEDIR
         $sudo nohup ./stathub -c conf/stathub.conf & \Entsdaer
 }
 

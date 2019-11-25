@@ -3,7 +3,7 @@
 VERSION="1.0"
 STATHUB_URL="https://github.com/cgw-9527/stathub/releases/download/v${VERSION}"
 
-BASEDIR="/stathub"
+BASEDIR="stathub"
 
 [ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
 id -u nobody >/dev/null 2>&1
@@ -42,12 +42,12 @@ fi
 
 tar zxf stathub.$(uname -m).tar.gz
 chmod +x stathub service
-[ ! -d conf ] && $sudo mkdir $BASEDIR/conf
+[ ! -d conf ] && $sudo mkdir conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
 fi
-$sudo mkdir $BASEDIR/pkgs
-mv stathub.*.tar.gz $BASEDIR/pkgs
+$sudo mkdir pkgs
+mv stathub.*.tar.gz pkgs
 
 if [ -z "$(grep stathub /etc/rc.local)" ]; then
     $sudo sh -c "echo \"cd $BASEDIR; rm -f log/stathub.pid; ./service start >>$BASEDIR/log/stathub.log 2>&1\" >> /etc/rc.local"
@@ -57,10 +57,6 @@ echo "----------------------------------------------------"
 echo "| Server install successful, Please start it using |"
 echo "| ./service {start|stop|restart}                   |"
 echo "| Now it will automatic start                      |"
-echo "|                                                  |"
-echo "| Feedback: https://github.com/likexian/stathub-go |"
-echo "| Thank you for your using, By Li Kexian           |"
-echo "| StatHub, Apache License, Version 2.0             |"
 echo "----------------------------------------------------"
 
-$sudo ./service start
+$sudo ./service.sh start
