@@ -73,7 +73,7 @@ func main() {
 		timeStamp := fmt.Sprintf("%d", SERVER_START)
 		id := Md5(fmt.Sprintf("%d", os.Getpid()), timeStamp)
 		key := Md5(id, timeStamp)
-		password := Md5(key, "cgw-9527")
+		password := Md5(key, "likexian")
 		err := newServerConfig(*configFile, id, "", password, key)
 		if err != nil {
 			SERVER_LOGGER.Fatal(err.Error())
