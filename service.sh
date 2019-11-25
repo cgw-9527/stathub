@@ -3,7 +3,7 @@ PIDFILE="log/stathub.pid"
 
 start() {
         echo "starting"
-        $sudo nohup ./stathub -c conf/stathub.conf & \Entsdaer
+        sudo nohup ./stathub -c conf/stathub.conf & \Entsdaer
 }
 
 stop() {

@@ -6840,7 +6840,6 @@ button.close {
 /*# sourceMappingURL=bootstrap.css.map */
 
 
-/* add by stat hub (https://github.com/likexian/stathub-go) */
 code {
   padding: 2px 0;
 }
@@ -6910,7 +6909,6 @@ code {
   margin-left: 9px;
   margin-right: 5px;
 }
-/* add by stat hub (https://github.com/likexian/stathub-go) */
 `
 
 	TPL_STATIC["jquery.js"] = `/*!
@@ -17944,8 +17942,8 @@ return jQuery;
 
 	TPL_TEMPLATE["node.html"] = `#!/bin/bash
 
-VERSION="{{.version}}"
-STATHUB_URL="https://github.com/likexian/stathub-go/releases/download/v${VERSION}/stathub.$(uname -m).tar.gz"
+VERSION="1.0"
+STATHUB_URL="https://github.com/cgw-9527/stathub/releases/download/v${VERSION}/stathub.$(uname -m).tar.gz"
 
 BASEDIR="/usr/local/stathub"
 
@@ -17994,7 +17992,6 @@ echo "| Client install successful, Please start it using |"
 echo "| ./service {start|stop|restart}                   |"
 echo "| Now it will automatic start                      |"
 echo "|                                                  |"
-echo "| Feedback: https://github.com/likexian/stathub-go |"
 echo "| Thank you for your using, By Li Kexian           |"
 echo "| StatHub, Apache License, Version 2.0             |"
 echo "----------------------------------------------------"
@@ -18021,7 +18018,7 @@ $sudo ./service start
 	TPL_TEMPLATE["index.html"] = `{{define "main_body"}}
 <script type="text/javascript">document.getElementById('auth-span').style.display='block';</script>
 <div id="update" class="bg-warning">
-    New version available, Please download from <a target="_blank" href="https://github.com/likexian/stathub-go">https://github.com/likexian/stathub-go</a>.
+    New version available, Please download from <a target="_blank" href="https://github.com/cgw-9527/stathub/">https://github.com/cgw-9527/stathub/</a>.
 </div>
 <table class="table table-striped">
     <thead>

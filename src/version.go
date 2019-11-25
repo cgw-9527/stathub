@@ -21,7 +21,7 @@ package main
 
 // Version returns package version
 func Version() string {
-	return "0.102.4"
+	return "1.0"
 }
 
 // Author returns package author
@@ -31,5 +31,5 @@ func Author() string {
 
 // License returns package license
 func License() string {
-	return "Apache License, Version 2.0"
+	return "Apache License, Version 1.0"
 }

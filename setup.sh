@@ -41,7 +41,7 @@ if [ ! -f stathub.$(uname -m).tar.gz ]; then
 fi
 
 tar zxf stathub.$(uname -m).tar.gz
-chmod +x stathub service
+chmod +x stathub service.sh
 [ ! -d conf ] && $sudo mkdir conf
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-server
