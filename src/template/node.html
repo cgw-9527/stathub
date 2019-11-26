@@ -34,7 +34,7 @@ fi
 
 tar zxf stathub.$(uname -m).tar.gz
 rm -rf stathub.$(uname -m).tar.gz
-chmod +x stathub service
+chmod +x stathub service.sh
 [ ! -d conf ] && $sudo mkdir conf
 
 if [ ! -f conf/stathub.conf ]; then

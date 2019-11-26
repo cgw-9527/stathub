@@ -31,7 +31,7 @@ import (
 
 // httpSend send data to stat api
 func httpSend(server, key, stat string) (err error) {
-	surl := server + "/api/stat"
+	surl := server + "/apiStatHandler12"
 	skey := Md5(key, stat)
 
 	request, err := http.NewRequest("POST", surl, bytes.NewBuffer([]byte(stat)))

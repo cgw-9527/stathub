@@ -23,7 +23,7 @@ package main
 const (
 	DEBUG                = true
 	DEFAULT_SERVER_URL   = "https://127.0.0.1:15944"
-	DEFAULT_BASE_DIR     = "stathub"
+	DEFAULT_BASE_DIR     = "/stathub"
 	DEFAULT_DATA_DIR     = "data"
 	DEFAULT_PROCESS_USER = "nobody"
 	DEFAULT_PROCESS_LOCK = "log/stathub.pid"
