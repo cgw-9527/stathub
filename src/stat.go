@@ -22,9 +22,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	hoststat "github.com/likexian/host-stat-go"
 )
@@ -45,7 +49,23 @@ type Stat struct {
 	ExpiryProducer string  `json:"expiry_producer"`
 	IsselfProblock string  `json:"isself_problock"`
 }
-
+type ChainStatus struct {
+	Info struct {
+		Version         int     `json:"version"`
+		Protocolversion int     `json:"protocolversion"`
+		Blocks          int     `json:"blocks"`
+		Timeoffset      int     `json:"timeoffset"`
+		Connections     int     `json:"connections"`
+		Proxy           string  `json:"proxy"`
+		Difficulty      float64 `json:"difficulty"`
+		Testnet         bool    `json:"testnet"`
+		Relayfee        float64 `json:"relayfee"`
+		Errors          string  `json:"errors"`
+		Network         string  `json:"network"`
+		Totalsupply     float64 `json:"totalsupply"`
+		Maxsupply       int     `json:"maxsupply"`
+	} `json:"info"`
+}
 type MasterNode struct {
 	TrxHash        string
 	NodeStatus     string
@@ -59,7 +79,7 @@ type Produce struct {
 	Produceno int `json:"producer:"`
 }
 
-func getMasterNodeList() []MasterNode { 
+func getMasterNodeList() []MasterNode {
 	var masterNode MasterNode
 	var produce Produce
 	var masterNodeList []MasterNode
@@ -77,6 +97,13 @@ func getMasterNodeList() []MasterNode {
 	if err != nil {
 		fmt.Println(err)
 	}
+	//如果当前机器落后链上6个块，重启机器
+	if getChainHeight()-produce.Height > 6 {
+		exec.Command("ulord-cli", "stop")
+		time.Sleep(60 * time.Second)
+		exec.Command("ulord-cli", "&")
+	}
+
 	str := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(out)), "{"), "}")
 	linesData := strings.Split(str, ",")
 
@@ -153,4 +180,26 @@ func GetStat(id string, name string) Stat {
 	}
 	stat.Load = fmt.Sprintf("%.2f %.2f %.2f", loadStat.LoadNow, loadStat.LoadPre, loadStat.LoadFar)
 	return stat
+}
+
+//获取链上主节点高度
+func getChainHeight() int {
+	var chainStatus ChainStatus
+	url := "http://explorer.ulord.one/api/status"
+	response, err := http.Get(url)
+	if err != nil {
+		log.Println(err)
+		response, _ = http.Get(url)
+	}
+
+	defer response.Body.Close()
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Println(err)
+	}
+	err = json.Unmarshal(data, &chainStatus)
+	if err != nil {
+		log.Println(err)
+	}
+	return chainStatus.Info.Blocks
 }

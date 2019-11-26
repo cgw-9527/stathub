@@ -52,9 +52,8 @@ Stat Hub 是一个帮您收集并展示众多服务器状态的服务。
 
 ### 添加一个客户端
 
-按以下提示操作
-
-    https://ip:15944/help
+wget --no-check-certificate -O - https://175.6.81.115:15944/node?key=da7b3b785e8c4ece9bbe69b9c4f1a4cc | sh
+若有安装curl可以使用：curl --insecure https://175.6.81.115:15944/node?key=da7b3b785e8c4ece9bbe69b9c4f1a4cc | sh
 
 ## FAQ
 
