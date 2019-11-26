@@ -3,7 +3,7 @@
 VERSION="1.0"
 STATHUB_URL="https://github.com/cgw-9527/stathub/releases/download/v${VERSION}/stathub.$(uname -m).tar.gz"
 
-BASEDIR="/usr/local/stathub"
+BASEDIR="stathub"
 
 [ $(id -u) -ne 0 ] && sudo="sudo" || sudo=""
 $sudo mkdir -p $BASEDIR
@@ -35,7 +35,7 @@ fi
 tar zxf stathub.$(uname -m).tar.gz
 rm -rf stathub.$(uname -m).tar.gz
 chmod +x stathub service
-[ ! -d conf ] && $sudo mkdir $BASEDIR/conf
+[ ! -d conf ] && $sudo mkdir conf
 
 if [ ! -f conf/stathub.conf ]; then
     $sudo ./stathub -c conf/stathub.conf --init-client --server-url https://{{.server}} --server-key {{.key}}
@@ -54,4 +54,4 @@ echo "| Thank you for your using, By Li Kexian           |"
 echo "| StatHub, Apache License, Version 2.0             |"
 echo "----------------------------------------------------"
 
-$sudo ./service start
+$sudo ./service.sh start
