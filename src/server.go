@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -62,9 +63,9 @@ type Updatestat struct {
 
 // HttpService start http service
 func HttpService() {
-	http.HandleFunc("/apiStatHandler12", apiStatHandler12)
+	http.HandleFunc("/sendStat", sendStat)
 	http.HandleFunc("/getMasterNodeStatus", getMasterNodeStatus)
-	http.HandleFunc("/getMasterNodeList", getMasterNode)
+	http.HandleFunc("/getMasterNodeList", getMasterNodes)
 
 	SERVER_LOGGER.Info("start http service")
 	err := http.ListenAndServeTLS(":15944",
@@ -75,54 +76,59 @@ func HttpService() {
 }
 
 //查询最新主节点信息
-func getMasterNode(w http.ResponseWriter, r *http.Request) {
-	// engine := getEngine()
-	// defer engine.Close()
-	// data, err := engine.QueryString("select * from updatestat;")
-	// if err != nil {
-	// 	log.Println(err)
-	// 	data, _ = engine.QueryString("select * from updatestat;")
-	// }
-	// if data == nil {
-	result := `{"status": {"code": 0, "message": "数据为空"}}`
-	fmt.Fprintf(w, result)
-	return
-	// } else {
-	// 	result := `{"status": {"code": 0, "data":%v}}`
-	// 	fmt.Fprintf(w, result, data)
-	// 	return
-	// }
+func getMasterNodes(w http.ResponseWriter, r *http.Request) {
+	engine := getEngine()
+	defer engine.Close()
+	data, err := engine.QueryString("select * from updatestat;")
+	if err != nil {
+		log.Println(err)
+		data, _ = engine.QueryString("select * from updatestat;")
+	}
+	if data == nil {
+		result := `{"status": {"code": 0, "message": "数据为空"}}`
+		fmt.Fprintf(w, result)
+		return
+	} else {
+		result := `{"status": {"code": 0, "data":%v}}`
+		fmt.Fprintf(w, result, data)
+		return
+	}
 }
 
 //根据索引查主节点信息
 func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
-	// r.ParseForm()
-	// index := r.Form["index"][0]
-	// pageNum, _ := strconv.Atoi(r.Form["pageNun"][0])
-	// pageSize, _ := strconv.Atoi(r.Form["pageSize"][0])
+	r.ParseForm()
+	index := r.Form["index"][0]
+	pageNum, _ := strconv.Atoi(r.Form["pageNun"][0])
+	pageSize, _ := strconv.Atoi(r.Form["pageSize"][0])
 
-	// start := (pageNum - 1) * pageSize
-	// offset := pageSize
+	start := (pageNum - 1) * pageSize
+	offset := pageSize
 
-	// engine := getEngine()
-	// defer engine.Close()
-	// data, err := engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	data, _ = engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
-	// }
-	// if data == nil {
-	result := `{"status": {"code": 0, "message": "数据为空"}}`
-	fmt.Fprintf(w, result)
-	return
-	// } else {
-	// 	result := `{"status": {"code": 0, "data":%v}}`
-	// 	fmt.Fprintf(w, result, data)
-	// 	return
-	// }
+	if pageNum == 0 || pageSize == 0 {
+		result := `{"status": {"code": 0,"message":"pageNum或者pageSize不能为空"}}`
+		fmt.Fprintf(w, result)
+		return
+	}
+	engine := getEngine()
+	defer engine.Close()
+	data, err := engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
+	if err != nil {
+		log.Println(err)
+		data, _ = engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
+	}
+	if data == nil {
+		result := `{"status": {"code": 0, "message": "数据为空"}}`
+		fmt.Fprintf(w, result)
+		return
+	} else {
+		result := `{"status": {"code": 0, "data":%v}}`
+		fmt.Fprintf(w, result, data)
+		return
+	}
 }
 
-func apiStatHandler12(w http.ResponseWriter, r *http.Request) {
+func sendStat(w http.ResponseWriter, r *http.Request) {
 	var stat Stat
 	var statMysql Statmysql
 	var updateStat Updatestat
@@ -166,14 +172,14 @@ func apiStatHandler12(w http.ResponseWriter, r *http.Request) {
 	statMysql.IsselfProblock = stat.IsselfProblock
 	statMysql.TrxHash = stat.TrxHash
 
-	// engine := getEngine()
-	// defer engine.Close()
+	engine := getEngine()
+	defer engine.Close()
 
-	// _, err = engine.Insert(statMysql)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	engine.Insert(statMysql)
-	// }
+	_, err = engine.Insert(statMysql)
+	if err != nil {
+		log.Println(err)
+		engine.Insert(statMysql)
+	}
 	//更新数据
 	updateStat.Id = stat.Id
 	updateStat.CpuRate = stat.CPURate
@@ -187,25 +193,25 @@ func apiStatHandler12(w http.ResponseWriter, r *http.Request) {
 	updateStat.ExpiryProducer = stat.ExpiryProducer
 	updateStat.IsselfProblock = stat.IsselfProblock
 	updateStat.TrxHash = stat.TrxHash
-	// result, err := engine.QueryString("select * from updatestat where id=?;", stat.Id)
-	// if err != nil {
-	// 	log.Println(err)
-	// 	result, _ = engine.QueryString("select * from updatestat where id=?;", stat.Id)
-	// }
-	// if result != nil {
-	// 	_, err := engine.Id(stat.Id).Update(updateStat)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		engine.Id(stat.Id).Update(updateStat)
-	// 	}
-	// } else {
-	// 	_, err := engine.Insert(updateStat)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		engine.Insert(updateStat)
-	// 	}
+	result, err := engine.QueryString("select * from updatestat where id=?;", stat.Id)
+	if err != nil {
+		log.Println(err)
+		result, _ = engine.QueryString("select * from updatestat where id=?;", stat.Id)
+	}
+	if result != nil {
+		_, err := engine.Id(stat.Id).Update(updateStat)
+		if err != nil {
+			log.Println(err)
+			engine.Id(stat.Id).Update(updateStat)
+		}
+	} else {
+		_, err := engine.Insert(updateStat)
+		if err != nil {
+			log.Println(err)
+			engine.Insert(updateStat)
+		}
 
-	// }
+	}
 	if body == nil {
 		result := `{"status": {"code": 0, "message": "数据为空"}}`
 		fmt.Fprintf(w, result)
@@ -213,6 +219,7 @@ func apiStatHandler12(w http.ResponseWriter, r *http.Request) {
 	}
 	result1 := `{"status": {"code": 1, "message": "ok"}}`
 	fmt.Fprintf(w, result1)
+	return
 }
 
 //获取engine对象

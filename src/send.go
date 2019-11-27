@@ -31,7 +31,7 @@ import (
 
 // httpSend send data to stat api
 func httpSend(server, key, stat string) (err error) {
-	surl := server + "/apiStatHandler12"
+	surl := server + "/sendStat"
 	skey := Md5(key, stat)
 
 	request, err := http.NewRequest("POST", surl, bytes.NewBuffer([]byte(stat)))
@@ -45,7 +45,10 @@ func httpSend(server, key, stat string) (err error) {
 
 	tr := &http.Transport{
 		// If not self-signed certificate please disabled this.
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		MaxIdleConns:        700,
+		MaxIdleConnsPerHost: 700,
+		MaxConnsPerHost:     700,
 	}
 
 	client := &http.Client{
