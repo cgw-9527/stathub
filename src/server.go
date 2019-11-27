@@ -181,21 +181,21 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 
 	clientKey := getHTTPHeader(r, "X-Client-Key")
 	if clientKey == "" {
-		apiResult.Status.Code = 0
-		apiResult.Status.Message = "X-Client-Key ey empty"
+		result := `{"status": {"code": 0, "message": "key X-Client-Key invalid"}}`
+		fmt.Fprintf(w, result)
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		apiResult.Status.Code = 0
-		apiResult.Status.Message = "body error"
+		result := `{"status": {"code": 0, "message": "body invalid"}}`
+		fmt.Fprintf(w, result)
 		return
 	}
 	serverKey := Md5(SERVER_CONFIG.ServerKey, string(body))
 	if serverKey != clientKey {
-		apiResult.Status.Code = 0
-		apiResult.Status.Message = "key invalid"
+		result := `{"status": {"code": 0, "message": "key invalid"}}`
+		fmt.Fprintf(w, result)
 		return
 	}
 	// text := string(body)
@@ -259,8 +259,8 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 		apiResult.Status.Message = "数据为空"
 		return
 	}
-	apiResult.Status.Code = 1
-	apiResult.Status.Message = "ok"
+	result1 := `{"status": {"code": 1, "message": "ok"}}`
+	fmt.Fprintf(w, result1)
 	return
 }
 
