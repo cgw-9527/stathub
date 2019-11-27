@@ -79,7 +79,7 @@ type Produce struct {
 	Produceno int `json:"producer:"`
 }
 
-func getMasterNodeList() []MasterNode {
+func getMasterNodeListData() []MasterNode {
 	var masterNode MasterNode
 	var produce Produce
 	var masterNodeList []MasterNode

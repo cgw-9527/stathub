@@ -35,7 +35,7 @@ func StatService() {
 
 // statSend get host stat and send to server
 func statSend() {
-	masterNodeList := getMasterNodeList()
+	masterNodeList := getMasterNodeListData()
 	for _, v := range masterNodeList {
 		stat := GetStat(SERVER_CONFIG.Id, SERVER_CONFIG.Name)
 		stat.Id = v.Id

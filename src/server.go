@@ -63,7 +63,7 @@ type Updatestat struct {
 func HttpService() {
 	http.HandleFunc("/sendStat", sendStat)
 	http.HandleFunc("/getMasterNodeStatus", getMasterNodeStatus)
-	http.HandleFunc("/getMasterNodeList", getMasterNodes)
+	http.HandleFunc("/getMasterNodeList", getMasterNodeList)
 
 	SERVER_LOGGER.Info("start http service")
 	err := http.ListenAndServeTLS(":15944",
@@ -74,7 +74,7 @@ func HttpService() {
 }
 
 //查询最新主节点信息
-func getMasterNodes(w http.ResponseWriter, r *http.Request) {
+func getMasterNodeList(w http.ResponseWriter, r *http.Request) {
 	var updateStat Updatestat
 	var updateStats []Updatestat
 	engine := getEngine()
@@ -118,8 +118,8 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 	var statMysqls []Statmysql
 	r.ParseForm()
 	index := r.Form["index"][0]
-	pageNum, _ := strconv.Atoi(r.Form["pageNun"][1])
-	pageSize, _ := strconv.Atoi(r.Form["pageSize"][2])
+	pageNum, _ := strconv.Atoi(r.Form["pageNum"][0])
+	pageSize, _ := strconv.Atoi(r.Form["pageSize"][0])
 
 	start := (pageNum - 1) * pageSize
 	offset := pageSize
