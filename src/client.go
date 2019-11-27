@@ -30,6 +30,7 @@ func StatService() {
 	for {
 		statSend()
 		time.Sleep(300 * time.Second)
+		go checkStatus()
 	}
 }
 

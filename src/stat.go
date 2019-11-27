@@ -79,6 +79,28 @@ type Produce struct {
 	Produceno int `json:"producer:"`
 }
 
+//Check master status
+func checkStatus() {
+	var produce Produce
+	cmd := exec.Command("ulord-cli", "masternode", "current")
+	out1, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = json.Unmarshal(out1, &produce)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	//If the current machine falls behind 6 blocks on the chain, restart the machine
+	if getChainHeight()-produce.Height > 6 {
+		exec.Command("ulord-cli", "stop")
+		time.Sleep(60 * time.Second)
+		exec.Command("ulord-cli", "&")
+	}
+}
+
+//Get master node list data
 func getMasterNodeListData() []MasterNode {
 	var masterNode MasterNode
 	var produce Produce
@@ -97,13 +119,8 @@ func getMasterNodeListData() []MasterNode {
 	if err != nil {
 		fmt.Println(err)
 	}
-	//如果当前机器落后链上6个块，重启机器
-	if getChainHeight()-produce.Height > 6 {
-		exec.Command("ulord-cli", "stop")
-		time.Sleep(60 * time.Second)
-		exec.Command("ulord-cli", "&")
-	}
 
+	//Processing Linux return data
 	str := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(out)), "{"), "}")
 	linesData := strings.Split(str, ",")
 
@@ -182,7 +199,7 @@ func GetStat(id string, name string) Stat {
 	return stat
 }
 
-//获取链上主节点高度
+//Get the height of the master node on the chain
 func getChainHeight() int {
 	var chainStatus ChainStatus
 	url := "http://explorer.ulord.one/api/status"

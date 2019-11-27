@@ -42,7 +42,6 @@ func httpSend(server, key, stat string) (err error) {
 
 	request.Header.Set("X-Client-Key", skey)
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("User-Agent", "Stat Hub API Client/"+Version()+" (i@likexian.com)")
 
 	tr := &http.Transport{
 		// If not self-signed certificate please disabled this.

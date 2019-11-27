@@ -49,7 +49,6 @@ func main() {
 		SERVER_LOGGER.SetSizeRotate(3, 100*1024*1024)
 	}
 
-	showVersion := flag.Bool("v", false, "show current version")
 	configFile := flag.String("c", "", "set configuration file")
 	initServer := flag.Bool("init-server", false, "init server configuration")
 	initClient := flag.Bool("init-client", false, "init client configuration")
@@ -57,12 +56,6 @@ func main() {
 	serverUrl := flag.String("server-url", "", "set server url, required when init client")
 
 	flag.Parse()
-
-	if *showVersion {
-		version := fmt.Sprintf("StatHub v%s-%s\n%s\n%s", Version(), TPL_REVHEAD, License(), Author())
-		fmt.Println(version)
-		os.Exit(0)
-	}
 
 	if *configFile == "" {
 		flag.Usage()

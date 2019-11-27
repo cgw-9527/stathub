@@ -44,13 +44,6 @@ type Statmysql struct {
 	IsselfProblock string  `xorm:"not null comment('是否自己出块') VARCHAR(255)"`
 	TrxHash        string  `xorm:"not null comment('主节点交易hash') VARCHAR(255)"`
 }
-type ApiResult struct {
-	Status ApiStatus `json:"status"`
-}
-type ApiStatus struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
 
 type Updatestat struct {
 	Id             string  `xorm:"not null pk comment('主节点索引') INT(11)"`
@@ -81,7 +74,7 @@ func HttpService() {
 	}
 }
 
-//查询最新主节点信息
+//Query the latest master node information
 func getMasterNodeList(w http.ResponseWriter, r *http.Request) {
 	var updateStat Updatestat
 	var updateStats []Updatestat
@@ -93,7 +86,7 @@ func getMasterNodeList(w http.ResponseWriter, r *http.Request) {
 		datas, _ = engine.QueryString("select * from updatestat;")
 	}
 	if datas == nil {
-		result := `{"status": {"code": 0, "message": "数据为空"}}`
+		result := `{"status": {"code": 0, "message": "data is empty"}}`
 		fmt.Fprintf(w, result)
 		return
 	} else {
@@ -114,13 +107,13 @@ func getMasterNodeList(w http.ResponseWriter, r *http.Request) {
 			updateStats = append(updateStats, updateStat)
 		}
 
-		result := `{"status": {"code": 0, "data":%v}}`
+		result := `{"code": 200, "data":%v}`
 		fmt.Fprintf(w, result, updateStats)
 		return
 	}
 }
 
-//根据索引查主节点信息
+//Query master node information according to index
 func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 	var statMysql Statmysql
 	var statMysqls []Statmysql
@@ -133,7 +126,7 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 	offset := pageSize
 
 	if pageNum == 0 || pageSize == 0 {
-		result := `{"status": {"code": 0,"message":"pageNum或者pageSize不能为空"}}`
+		result := `{"status": {"code": 0,"message":"Pagenum or PageSize cannot be empty"}}`
 		fmt.Fprintf(w, result)
 		return
 	}
@@ -145,7 +138,7 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 		datas, _ = engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
 	}
 	if datas == nil {
-		result := `{"status": {"code": 0, "message": "数据为空"}}`
+		result := `{"status": {"code": 0, "message": "data is empty"}}`
 		fmt.Fprintf(w, result)
 		return
 	} else {
@@ -164,7 +157,7 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 			statMysql.TrxHash = data["trx_hash"]
 			statMysqls = append(statMysqls, statMysql)
 		}
-		result := `{"status": {"code": 0, "data":%v}}`
+		result := `{"code": 0, "data":%v}`
 		fmt.Fprintf(w, result, statMysqls)
 		return
 	}
@@ -174,10 +167,6 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 	var stat Stat
 	var statMysql Statmysql
 	var updateStat Updatestat
-
-	apiResult := ApiResult{
-		Status: ApiStatus{},
-	}
 
 	clientKey := getHTTPHeader(r, "X-Client-Key")
 	if clientKey == "" {
@@ -200,7 +189,7 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 	}
 	// text := string(body)
 	json.Unmarshal(body, &stat)
-	//保存数据
+	//save data
 	statMysql.Id = stat.Id
 	statMysql.CpuRate = stat.CPURate
 	statMysql.Raw = stat.MemRate
@@ -222,7 +211,7 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		engine.Insert(statMysql)
 	}
-	//更新数据
+	//update data
 	updateStat.Id = stat.Id
 	updateStat.CpuRate = stat.CPURate
 	updateStat.Raw = stat.MemRate
@@ -255,8 +244,8 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if body == nil {
-		apiResult.Status.Code = 0
-		apiResult.Status.Message = "数据为空"
+		result := `{"status": {"code": 0, "message": "data is empty"}}`
+		fmt.Fprintf(w, result)
 		return
 	}
 	result1 := `{"status": {"code": 1, "message": "ok"}}`
