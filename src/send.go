@@ -23,10 +23,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"errors"
-	"github.com/likexian/simplejson-go"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/likexian/simplejson-go"
 )
 
 // httpSend send data to stat api

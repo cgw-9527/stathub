@@ -54,7 +54,7 @@ func statSend() {
 		}
 
 		SERVER_LOGGER.Debug("get stat data: %s", result)
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 2; i++ {
 			err := httpSend(SERVER_CONFIG.ServerUrl, SERVER_CONFIG.ServerKey, result)
 			if err != nil {
 				SERVER_LOGGER.Error("send stat failed, %s", err.Error())
@@ -64,6 +64,7 @@ func statSend() {
 				break
 			}
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 
 }

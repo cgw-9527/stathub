@@ -26,10 +26,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/go-xorm/xorm"
 )
 
 type Statmysql struct {
@@ -77,26 +75,47 @@ func HttpService() {
 
 //查询最新主节点信息
 func getMasterNodes(w http.ResponseWriter, r *http.Request) {
+	var updateStat Updatestat
+	var updateStats []Updatestat
 	engine := getEngine()
 	defer engine.Close()
-	data, err := engine.QueryString("select * from updatestat;")
+	datas, err := engine.QueryString("select * from updatestat;")
 	if err != nil {
 		log.Println(err)
-		data, _ = engine.QueryString("select * from updatestat;")
+		datas, _ = engine.QueryString("select * from updatestat;")
 	}
-	if data == nil {
+	if datas == nil {
 		result := `{"status": {"code": 0, "message": "数据为空"}}`
 		fmt.Fprintf(w, result)
 		return
 	} else {
+		for _, data := range datas {
+			//将map转化为json
+			updateStat.Id = data["id"]
+			updateStat.CpuRate = stringToFloat64(data["cpu_rate"])
+			updateStat.Raw = stringToFloat64(data["raw"])
+			updateStat.NetRate = data["net_rate"]
+			updateStat.System = data["system"]
+			updateStat.Load = data["load"]
+			updateStat.OnlineTime = data["online_time"]
+			updateStat.BlockNum = data["block_num"]
+			updateStat.NodeStatus = data["node_status"]
+			updateStat.ExpiryProducer = data["expiry_producer"]
+			updateStat.IsselfProblock = data["isself_problock"]
+			updateStat.TrxHash = data["trx_hash"]
+			updateStats = append(updateStats, updateStat)
+		}
+
 		result := `{"status": {"code": 0, "data":%v}}`
-		fmt.Fprintf(w, result, data)
+		fmt.Fprintf(w, result, updateStats)
 		return
 	}
 }
 
 //根据索引查主节点信息
 func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
+	var statMysql Statmysql
+	var statMysqls []Statmysql
 	r.ParseForm()
 	index := r.Form["index"][0]
 	pageNum, _ := strconv.Atoi(r.Form["pageNun"][0])
@@ -112,18 +131,33 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	engine := getEngine()
 	defer engine.Close()
-	data, err := engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
+	datas, err := engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
 	if err != nil {
 		log.Println(err)
-		data, _ = engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
+		datas, _ = engine.QueryString("select * from statmysql where id=? limit ?,?;", index, start, offset)
 	}
-	if data == nil {
+	if datas == nil {
 		result := `{"status": {"code": 0, "message": "数据为空"}}`
 		fmt.Fprintf(w, result)
 		return
 	} else {
+		for _, data := range datas {
+			statMysql.Id = data["id"]
+			statMysql.CpuRate = stringToFloat64(data["cpu_rate"])
+			statMysql.Raw = stringToFloat64(data["raw"])
+			statMysql.NetRate = data["net_rate"]
+			statMysql.System = data["system"]
+			statMysql.Load = data["load"]
+			statMysql.OnlineTime = data["online_time"]
+			statMysql.BlockNum = data["block_num"]
+			statMysql.NodeStatus = data["node_status"]
+			statMysql.ExpiryProducer = data["expiry_producer"]
+			statMysql.IsselfProblock = data["isself_problock"]
+			statMysql.TrxHash = data["trx_hash"]
+			statMysqls = append(statMysqls, statMysql)
+		}
 		result := `{"status": {"code": 0, "data":%v}}`
-		fmt.Fprintf(w, result, data)
+		fmt.Fprintf(w, result, statMysqls)
 		return
 	}
 }
@@ -132,10 +166,6 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 	var stat Stat
 	var statMysql Statmysql
 	var updateStat Updatestat
-	ip := getHTTPHeader(r, "X-Real-Ip")
-	if ip == "" {
-		ip = strings.Split(r.RemoteAddr, ":")[0]
-	}
 
 	clientKey := getHTTPHeader(r, "X-Client-Key")
 	if clientKey == "" {
@@ -220,17 +250,6 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 	result1 := `{"status": {"code": 1, "message": "ok"}}`
 	fmt.Fprintf(w, result1)
 	return
-}
-
-//获取engine对象
-func getEngine() *xorm.Engine {
-	engine, err := xorm.NewEngine("mysql", "root:123456@tcp(127.0.0.1:3306)/data?parseTime=true")
-	if err != nil {
-		log.Println("生成engine对象失败", err)
-		engine, _ = xorm.NewEngine("mysql", "root:123456@tcp(127.0.0.1:3306)/data?parseTime=true")
-	}
-	engine.SetMaxOpenConns(5)
-	return engine
 }
 
 func getHTTPHeader(r *http.Request, name string) string {

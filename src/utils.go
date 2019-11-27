@@ -24,10 +24,14 @@ import (
 	"crypto/md5"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+
+	"github.com/go-xorm/xorm"
 )
 
 // Byte units
@@ -97,6 +101,34 @@ func ReadFile(fname string) (result string, err error) {
 	result = string(text)
 
 	return
+}
+func float64ToString(in float64) string {
+	s1 := strconv.FormatFloat(in, 'f', -1, 64)
+	return s1
+}
+func stringToFloat64(in string) float64 {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("[[Recovery] panic recovered:", err)
+		}
+	}()
+	count, err := strconv.ParseFloat(in, 64)
+	if err != nil {
+		log.Fatalln("Failure of String Conversion.")
+		panic(err)
+	}
+	return count
+}
+
+//获取engine对象
+func getEngine() *xorm.Engine {
+	engine, err := xorm.NewEngine("mysql", "root:123456@tcp(127.0.0.1:3306)/data?parseTime=true")
+	if err != nil {
+		log.Println("生成engine对象失败", err)
+		engine, _ = xorm.NewEngine("mysql", "root:123456@tcp(127.0.0.1:3306)/data?parseTime=true")
+	}
+	engine.SetMaxOpenConns(5)
+	return engine
 }
 
 // WriteFile write text to file
