@@ -44,6 +44,14 @@ type Statmysql struct {
 	IsselfProblock string  `xorm:"not null comment('是否自己出块') VARCHAR(255)"`
 	TrxHash        string  `xorm:"not null comment('主节点交易hash') VARCHAR(255)"`
 }
+type ApiResult struct {
+	Status ApiStatus `json:"status"`
+}
+type ApiStatus struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 type Updatestat struct {
 	Id             string  `xorm:"not null pk comment('主节点索引') INT(11)"`
 	CpuRate        float64 `xorm:"not null comment('cpu利用率') FLOAT"`
@@ -167,23 +175,27 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 	var statMysql Statmysql
 	var updateStat Updatestat
 
+	apiResult := ApiResult{
+		Status: ApiStatus{},
+	}
+
 	clientKey := getHTTPHeader(r, "X-Client-Key")
 	if clientKey == "" {
-		result := `{"status": {"code": 0, "message": "key X-Client-Key invalid"}}`
-		fmt.Fprintf(w, result)
+		apiResult.Status.Code = 0
+		apiResult.Status.Message = "X-Client-Key ey empty"
 		return
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		result := `{"status": {"code": 0, "message": "body invalid"}}`
-		fmt.Fprintf(w, result)
+		apiResult.Status.Code = 0
+		apiResult.Status.Message = "body error"
 		return
 	}
 	serverKey := Md5(SERVER_CONFIG.ServerKey, string(body))
 	if serverKey != clientKey {
-		result := `{"status": {"code": 0, "message": "key invalid"}}`
-		fmt.Fprintf(w, result)
+		apiResult.Status.Code = 0
+		apiResult.Status.Message = "key invalid"
 		return
 	}
 	// text := string(body)
@@ -243,12 +255,12 @@ func sendStat(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if body == nil {
-		result := `{"status": {"code": 0, "message": "数据为空"}}`
-		fmt.Fprintf(w, result)
+		apiResult.Status.Code = 0
+		apiResult.Status.Message = "数据为空"
 		return
 	}
-	result1 := `{"status": {"code": 1, "message": "ok"}}`
-	fmt.Fprintf(w, result1)
+	apiResult.Status.Code = 1
+	apiResult.Status.Message = "ok"
 	return
 }
 
