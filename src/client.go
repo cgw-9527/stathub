@@ -27,10 +27,9 @@ import (
 // StatService statSend loop
 func StatService() {
 	SERVER_LOGGER.Info("start stat service")
-	go statSend()
-	t := time.NewTicker(300 * time.Second)
-	for range t.C {
-		go statSend()
+	for {
+		statSend()
+		time.Sleep(300 * time.Second)
 	}
 }
 
@@ -54,7 +53,7 @@ func statSend() {
 		}
 
 		SERVER_LOGGER.Debug("get stat data: %s", result)
-		for i := 0; i < 2; i++ {
+		for i := 0; i < 3; i++ {
 			err := httpSend(SERVER_CONFIG.ServerUrl, SERVER_CONFIG.ServerKey, result)
 			if err != nil {
 				SERVER_LOGGER.Error("send stat failed, %s", err.Error())
@@ -64,7 +63,6 @@ func statSend() {
 				break
 			}
 		}
-		time.Sleep(100 * time.Millisecond)
 	}
 
 }

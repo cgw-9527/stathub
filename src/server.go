@@ -118,8 +118,8 @@ func getMasterNodeStatus(w http.ResponseWriter, r *http.Request) {
 	var statMysqls []Statmysql
 	r.ParseForm()
 	index := r.Form["index"][0]
-	pageNum, _ := strconv.Atoi(r.Form["pageNun"][0])
-	pageSize, _ := strconv.Atoi(r.Form["pageSize"][0])
+	pageNum, _ := strconv.Atoi(r.Form["pageNun"][1])
+	pageSize, _ := strconv.Atoi(r.Form["pageSize"][2])
 
 	start := (pageNum - 1) * pageSize
 	offset := pageSize
