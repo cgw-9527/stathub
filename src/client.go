@@ -27,35 +27,34 @@ import (
 // StatService statSend loop
 func StatService() {
 	SERVER_LOGGER.Info("start stat service")
+	go checkStatus()
 	for {
 		statSend()
 		time.Sleep(300 * time.Second)
-		go checkStatus()
 	}
 }
 
 // statSend get host stat and send to server
 func statSend() {
-		stat := GetStat(SERVER_CONFIG.Id, SERVER_CONFIG.Name)
-		//将结构体数据转为string
-		data := simplejson.New(stat)
-		result, err := data.Dumps()
-		if err != nil {
-			SERVER_LOGGER.Error("get stat failed: %s", err.Error())
-			return
-		}
+	stat := GetStat(SERVER_CONFIG.Id, SERVER_CONFIG.Name)
+	//将结构体数据转为string
+	data := simplejson.New(stat)
+	result, err := data.Dumps()
+	if err != nil {
+		SERVER_LOGGER.Error("get stat failed: %s", err.Error())
+		return
+	}
 
-		SERVER_LOGGER.Debug("get stat data: %s", result)
-		for i := 0; i < 3; i++ {
-			err := httpSend(SERVER_CONFIG.ServerUrl, SERVER_CONFIG.ServerKey, result)
-			if err != nil {
-				SERVER_LOGGER.Error("send stat failed, %s", err.Error())
-				time.Sleep(3 * time.Second)
-			} else {
-				SERVER_LOGGER.Debug("send stat to server successful")
-				break
-			}
+	SERVER_LOGGER.Debug("get stat data: %s", result)
+	for i := 0; i < 3; i++ {
+		err := httpSend(SERVER_CONFIG.ServerUrl, SERVER_CONFIG.ServerKey, result)
+		if err != nil {
+			SERVER_LOGGER.Error("send stat failed, %s", err.Error())
+			time.Sleep(3 * time.Second)
+		} else {
+			SERVER_LOGGER.Debug("send stat to server successful")
+			break
 		}
-	
+	}
 
 }

@@ -66,22 +66,36 @@ type Produce struct {
 //Check master status
 func checkStatus() {
 	var produce Produce
-	cmd := exec.Command("ulord-cli", "masternode", "current")
-	out1, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = json.Unmarshal(out1, &produce)
-	if err != nil {
-		fmt.Println(err)
+	for {
+		cmd := exec.Command("ulord-cli", "masternode", "current")
+		out1, err := cmd.CombinedOutput()
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = json.Unmarshal(out1, &produce)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		//If the current machine falls behind 6 blocks on the chain, restart the machine
+		if getChainHeight()-produce.Height > 10 {
+			exec.Command("ulordd", "stop")
+			time.Sleep(60 * time.Second)
+		check:
+			cmd := exec.Command("ps", "aux|", "grep", "ulordd", "|grep", "-v", "grep")
+			out1, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println(err)
+			}
+			if out1 != nil {
+				time.Sleep(60 * time.Second)
+				goto check
+			}
+			exec.Command("ulordd", "&")
+		}
+		time.Sleep(30 * time.Minute)
 	}
 
-	//If the current machine falls behind 6 blocks on the chain, restart the machine
-	if getChainHeight()-produce.Height > 10 {
-		exec.Command("ulord-cli", "stop")
-		time.Sleep(60 * time.Second)
-		exec.Command("ulord-cli", "&")
-	}
 }
 
 // GetStat return stat data
