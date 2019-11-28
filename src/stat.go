@@ -26,8 +26,6 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 
 	hoststat "github.com/likexian/host-stat-go"
@@ -35,19 +33,13 @@ import (
 
 // Stat storing stat data
 type Stat struct {
-	Id             string  `json:"id"`         //
-	OSRelease      string  `json:"os_release"` //
-	Uptime         uint64  `json:"uptime"`     //
-	Load           string  `json:"load"`       //
-	CPURate        float64 `json:"cpu_rate"`   //
-	MemRate        float64 `json:"mem_rate"`   //
-	NetRead        uint64  `json:"net_read"`   //
-	NetWrite       uint64  `json:"net_write"`  //
-	TrxHash        string  `json:"trx_hash"`
-	NodeStatus     string  `json:"node_status"`
-	BlockNum       string  `json:"block_num"`
-	ExpiryProducer string  `json:"expiry_producer"`
-	IsselfProblock string  `json:"isself_problock"`
+	OSRelease string  `json:"os_release"` //
+	Uptime    uint64  `json:"uptime"`     //
+	Load      string  `json:"load"`       //
+	CPURate   float64 `json:"cpu_rate"`   //
+	MemRate   float64 `json:"mem_rate"`   //
+	NetRead   uint64  `json:"net_read"`   //
+	NetWrite  uint64  `json:"net_write"`  //
 }
 type ChainStatus struct {
 	Info struct {
@@ -98,50 +90,6 @@ func checkStatus() {
 		time.Sleep(60 * time.Second)
 		exec.Command("ulord-cli", "&")
 	}
-}
-
-//Get master node list data
-func getMasterNodeListData() []MasterNode {
-	var masterNode MasterNode
-	var produce Produce
-	var masterNodeList []MasterNode
-	cmd := exec.Command("ulord-cli", "masternodelist", "full")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-	}
-	cmd = exec.Command("ulord-cli", "masternode", "current")
-	out1, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = json.Unmarshal(out1, &produce)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	//Processing Linux return data
-	str := strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(out)), "{"), "}")
-	linesData := strings.Split(str, ",")
-
-	for _, lineData := range linesData {
-		s := strings.SplitN(lineData, ":", 2)
-		txHash := strings.Split(strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(s[0]), `"`), `"`), "-")
-		masterNode.TrxHash = txHash[0]
-
-		data := strings.Split(strings.TrimSuffix(strings.TrimSpace(strings.TrimPrefix(s[1], " "+`"`)), `"`), " ")
-		masterNode.Id = data[7]
-		masterNode.BlockNum = data[6]
-		masterNode.ExpiryProducer = data[4]
-		masterNode.NodeStatus = data[8]
-		if strconv.Itoa(produce.Produceno) == data[7] {
-			masterNode.IsselfProblock = "true"
-		} else {
-			masterNode.IsselfProblock = "false"
-		}
-		masterNodeList = append(masterNodeList, masterNode)
-	}
-	return masterNodeList
 }
 
 // GetStat return stat data

@@ -36,15 +36,7 @@ func StatService() {
 
 // statSend get host stat and send to server
 func statSend() {
-	masterNodeList := getMasterNodeListData()
-	for _, v := range masterNodeList {
 		stat := GetStat(SERVER_CONFIG.Id, SERVER_CONFIG.Name)
-		stat.Id = v.Id
-		stat.IsselfProblock = v.IsselfProblock
-		stat.ExpiryProducer = v.ExpiryProducer
-		stat.NodeStatus = v.NodeStatus
-		stat.BlockNum = v.BlockNum
-		stat.TrxHash = v.TrxHash
 		//将结构体数据转为string
 		data := simplejson.New(stat)
 		result, err := data.Dumps()
@@ -64,6 +56,6 @@ func statSend() {
 				break
 			}
 		}
-	}
+	
 
 }

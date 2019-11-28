@@ -50,7 +50,6 @@ func main() {
 	}
 
 	configFile := flag.String("c", "", "set configuration file")
-	initServer := flag.Bool("init-server", false, "init server configuration")
 	initClient := flag.Bool("init-client", false, "init client configuration")
 	serverKey := flag.String("server-key", "", "set server key, required when init client")
 	serverUrl := flag.String("server-url", "", "set server url, required when init client")
@@ -60,20 +59,6 @@ func main() {
 	if *configFile == "" {
 		flag.Usage()
 		os.Exit(1)
-	}
-
-	if *initServer {
-		timeStamp := fmt.Sprintf("%d", SERVER_START)
-		id := Md5(fmt.Sprintf("%d", os.Getpid()), timeStamp)
-		key := Md5(id, timeStamp)
-		password := Md5(key, "likexian")
-		err := newServerConfig(*configFile, id, "", password, key)
-		if err != nil {
-			SERVER_LOGGER.Fatal(err.Error())
-		} else {
-			SERVER_LOGGER.Info("init server configuration successful")
-			os.Exit(0)
-		}
 	}
 
 	if *initClient {
@@ -160,10 +145,5 @@ func main() {
 	}
 
 	SERVER_LOGGER.Info("server start at %d", SERVER_START)
-	if SERVER_CONFIG.Role == "server" {
-		// go StatService()
-		HttpService()
-	} else {
-		StatService()
-	}
+	StatService()
 }
