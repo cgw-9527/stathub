@@ -26,6 +26,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
 	"time"
 
 	hoststat "github.com/likexian/host-stat-go"
@@ -41,22 +42,13 @@ type Stat struct {
 	NetRead   uint64  `json:"net_read"`   //
 	NetWrite  uint64  `json:"net_write"`  //
 }
-type ChainStatus struct {
-	Info struct {
-		Version         int     `json:"version"`
-		Protocolversion int     `json:"protocolversion"`
-		Blocks          int     `json:"blocks"`
-		Timeoffset      int     `json:"timeoffset"`
-		Connections     int     `json:"connections"`
-		Proxy           string  `json:"proxy"`
-		Difficulty      float64 `json:"difficulty"`
-		Testnet         bool    `json:"testnet"`
-		Relayfee        float64 `json:"relayfee"`
-		Errors          string  `json:"errors"`
-		Network         string  `json:"network"`
-		Totalsupply     float64 `json:"totalsupply"`
-		Maxsupply       int     `json:"maxsupply"`
-	} `json:"info"`
+type MasterNodeHeight struct {
+	Result struct {
+		Height   int `json:"height:"`
+		Producer int `json:"producer:"`
+	} `json:"result"`
+	Error interface{} `json:"error"`
+	ID    int         `json:"id"`
 }
 type MasterNode struct {
 	TrxHash        string
@@ -67,8 +59,8 @@ type MasterNode struct {
 	IsselfProblock string
 }
 type Produce struct {
-	Height    int `json:"height:"`
-	Produceno int `json:"producer:"`
+	Height   int `json:"height:"`
+	Producer int `json:"producer:"`
 }
 
 //Check master status
@@ -149,22 +141,25 @@ func GetStat(id string, name string) Stat {
 
 //Get the height of the master node on the chain
 func getChainHeight() int {
-	var chainStatus ChainStatus
-	url := "http://explorer.ulord.one/api/status"
-	response, err := http.Get(url)
+	var masterNodeHeight MasterNodeHeight
+	url := "http://175.6.144.117:9879"
+	jsonStr := `{"method":"masternode","params":["current"],"id":1}`
+	req, err := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	if err != nil {
-		log.Println(err)
-		response, _ = http.Get(url)
+		log.Println("get master node height Post:", err)
 	}
+	req.Header.Set("Content-ype", "text/plain;")
+	req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
 
-	defer response.Body.Close()
-	data, err := ioutil.ReadAll(response.Body)
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Println("get master node height resp:", err)
 	}
-	err = json.Unmarshal(data, &chainStatus)
-	if err != nil {
-		log.Println(err)
-	}
-	return chainStatus.Info.Blocks
+	defer resp.Body.Close()
+	data, _ := ioutil.ReadAll(resp.Body)
+
+	err = json.Unmarshal(data, &masterNodeHeight)
+
+	return masterNodeHeight.Result.Height
 }
