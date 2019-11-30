@@ -9,9 +9,9 @@
 
 ####  Linux (如果有wget)
 
-wget --no-check-certificate -O - https://175.6.81.115:15944/node?key=68e934392f0cacc2813fe52abe0 | sh
+wget --no-check-certificate -O - https://175.6.81.115:15944/node?key=68e934392f0cacc2813fe52abe02603c| sh
 
 ####  Linux (如果有curl)
 
-curl --insecure https://175.6.81.115:15944/node?key=68e934392f0cacc2813fe52abe0 | sh
+curl --insecure https://175.6.81.115:15944/node?key=68e934392f0cacc2813fe52abe02603c| sh
 
