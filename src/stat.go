@@ -66,6 +66,20 @@ type Produce struct {
 //Check master status
 func checkStatus() {
 	var produce Produce
+	//If the master node is stopped, start it
+	str := "ps aux|grep ulordd|grep -v grep"
+	cmd := exec.Command("sh", "-c", str)
+	out1, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Println(err)
+	}
+	if string(out1) == "" {
+		s := "nohup ulordd &"
+		cmd = exec.Command("sh", "-c", s)
+		cmd.Run()
+		time.Sleep(30 * time.Minute)
+	}
+	//restart master node
 	for {
 		cmd := exec.Command("ulord-cli", "masternode", "current")
 		out1, err := cmd.CombinedOutput()
@@ -79,19 +93,23 @@ func checkStatus() {
 
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
 		if getChainHeight()-produce.Height > 10 {
-			exec.Command("ulordd", "stop")
+			cmd := exec.Command("ulord-cli", "stop")
+			cmd.CombinedOutput()
 			time.Sleep(60 * time.Second)
 		check:
-			cmd := exec.Command("ps", "aux|", "grep", "ulordd", "|grep", "-v", "grep")
+			str := "ps aux|grep ulordd|grep -v grep"
+			cmd = exec.Command("sh", "-c", str)
 			out1, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Println(err)
 			}
-			if out1 != nil {
+			if string(out1) != "" {
 				time.Sleep(60 * time.Second)
 				goto check
 			}
-			exec.Command("ulordd", "&")
+			s := "nohup ulordd &"
+			cmd = exec.Command("sh", "-c", s)
+			cmd.Run()
 		}
 		time.Sleep(30 * time.Minute)
 	}
