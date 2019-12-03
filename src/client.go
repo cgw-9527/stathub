@@ -20,13 +20,15 @@
 package main
 
 import (
-	"github.com/likexian/simplejson-go"
+	"log"
 	"time"
+
+	"github.com/likexian/simplejson-go"
 )
 
 // StatService statSend loop
 func StatService() {
-	SERVER_LOGGER.Info("start stat service")
+	log.Println("start stat service")
 	go checkStatus()
 	for {
 		statSend()
@@ -41,18 +43,18 @@ func statSend() {
 	data := simplejson.New(stat)
 	result, err := data.Dumps()
 	if err != nil {
-		SERVER_LOGGER.Error("get stat failed: %s", err.Error())
+		log.Println("get stat failed: %s", err.Error())
 		return
 	}
 
-	SERVER_LOGGER.Debug("get stat data: %s", result)
+	log.Println("get stat data: %s", result)
 	for i := 0; i < 3; i++ {
-		err := httpSend(SERVER_CONFIG.ServerUrl, SERVER_CONFIG.ServerKey, result)
+		err := httpSend(SERVER_CONFIG.ServerUrl, result)
 		if err != nil {
-			SERVER_LOGGER.Error("send stat failed, %s", err.Error())
+			log.Println("send stat failed, %s", err.Error())
 			time.Sleep(3 * time.Second)
 		} else {
-			SERVER_LOGGER.Debug("send stat to server successful")
+			log.Println("send stat to server successful")
 			break
 		}
 	}

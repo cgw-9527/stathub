@@ -26,29 +26,18 @@ import (
 )
 
 // httpSend send data to stat api
-func httpSend(server, key, stat string) (err error) {
-	surl := server + "/sendStat"
-	skey := Md5(key, stat)
+func httpSend(server, stat string) (err error) {
+	surl := server + "/receiveStat"
 
 	request, err := http.NewRequest("POST", surl, bytes.NewBuffer([]byte(stat)))
 	if err != nil {
 		return
 	}
 
-	request.Header.Set("X-Client-Key", skey)
 	request.Header.Set("Content-Type", "application/json")
-
-	// tr := &http.Transport{
-	// 	// If not self-signed certificate please disabled this.
-	// 	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-	// 	MaxIdleConns:        700,
-	// 	MaxIdleConnsPerHost: 700,
-	// 	MaxConnsPerHost:     700,
-	// }
 
 	client := &http.Client{
 		Timeout: time.Duration(30 * time.Second),
-		// Transport: tr,
 	}
 
 	response, err := client.Do(request)
@@ -57,21 +46,6 @@ func httpSend(server, key, stat string) (err error) {
 	}
 
 	defer response.Body.Close()
-	// data, err := ioutil.ReadAll(response.Body)
-	// if err != nil {
-	// 	return
-	// }
-
-	// jsonData, err := simplejson.Loads(string(data))
-	// if err != nil {
-	// 	return
-	// }
-
-	// status := jsonData.Get("status.code").MustInt(0)
-	// if status != 1 {
-	// 	message := jsonData.Get("status.message").MustString("unknown error")
-	// 	return errors.New("server return: " + message)
-	// }
 
 	return nil
 }

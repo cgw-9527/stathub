@@ -31,7 +31,6 @@ type Config struct {
 	Name       string `json:"name"`
 	Role       string `json:"role"`
 	PassWord   string `json:"password"`
-	ServerKey  string `json:"server_key"`
 	ServerUrl  string `json:"server_url"`
 	DaemonUser string `json:"daemon_user"`
 	PidFile    string `json:"pid_file"`
@@ -62,7 +61,6 @@ func GetConfig(fname string) (config Config, err error) {
 	config.Name = data.Get("name").MustString("")
 	config.Role = data.Get("role").MustString("")
 	config.PassWord = data.Get("password").MustString("")
-	config.ServerKey = data.Get("server_key").MustString("")
 	config.ServerUrl = data.Get("server_url").MustString("")
 	config.DaemonUser = data.Get("daemon_user").MustString("")
 	config.PidFile = data.Get("pid_file").MustString("")
@@ -81,10 +79,6 @@ func GetConfig(fname string) (config Config, err error) {
 		return config, errors.New("missing role config")
 	}
 
-	if config.ServerKey == "" {
-		return config, errors.New("missing server_key config")
-	}
-
 	if config.PidFile == "" {
 		return config, errors.New("missing pid_file config")
 	}
@@ -97,23 +91,8 @@ func GetConfig(fname string) (config Config, err error) {
 		return config, errors.New("missing base_dir config")
 	}
 
-	if config.Role == "server" {
-		if config.PassWord == "" {
-			return config, errors.New("missing password config")
-		}
-		if config.DataDir == "" {
-			return config, errors.New("missing data_dir config")
-		}
-		if config.TLSCert == "" {
-			return config, errors.New("missing tls_cert config")
-		}
-		if config.TLSKey == "" {
-			return config, errors.New("missing tls_key config")
-		}
-	} else {
-		if config.ServerUrl == "" {
-			return config, errors.New("missing server_url config")
-		}
+	if config.ServerUrl == "" {
+		return config, errors.New("missing server_url config")
 	}
 
 	if !strings.HasSuffix(config.BaseDir, "/") {
@@ -129,36 +108,13 @@ func GetConfig(fname string) (config Config, err error) {
 	return
 }
 
-// newServerConfig generate the new server config file
-func newServerConfig(fname, id, name, passWord, serverKey string) (err error) {
-	config := Config{
-		id,
-		name,
-		"server",
-		passWord,
-		serverKey,
-		DEFAULT_SERVER_URL,
-		DEFAULT_PROCESS_USER,
-		DEFAULT_PROCESS_LOCK,
-		DEFAULT_PROCESS_LOG,
-		DEFAULT_BASE_DIR,
-		DEFAULT_DATA_DIR,
-		DEFAULT_TLS_CERT,
-		DEFAULT_TLS_KEY,
-		fname,
-	}
-
-	return SaveConfig(config)
-}
-
 // newClientConfig generate the new cilent config file
-func newClientConfig(fname, id, name, serverKey, serverUrl string) (err error) {
+func newClientConfig(fname, id, name, serverUrl string) (err error) {
 	config := Config{
 		id,
 		name,
 		"client",
 		"",
-		serverKey,
 		serverUrl,
 		DEFAULT_PROCESS_USER,
 		DEFAULT_PROCESS_LOCK,

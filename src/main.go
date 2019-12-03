@@ -51,8 +51,8 @@ func main() {
 
 	configFile := flag.String("c", "", "set configuration file")
 	initClient := flag.Bool("init-client", false, "init client configuration")
-	serverKey := flag.String("server-key", "", "set server key, required when init client")
-	serverUrl := flag.String("server-url", "", "set server url, required when init client")
+
+	serverUrl := "http://175.6.81.115:15944"
 
 	flag.Parse()
 
@@ -62,15 +62,12 @@ func main() {
 	}
 
 	if *initClient {
-		if *serverKey == "" {
-			SERVER_LOGGER.Fatal("server key is required, set it by --server-key.")
-		}
-		if *serverUrl == "" {
+		if serverUrl == "" {
 			SERVER_LOGGER.Fatal("server url is required, set it by --server-url.")
 		}
 		timeStamp := fmt.Sprintf("%d", SERVER_START)
 		id := Md5(fmt.Sprintf("%d", os.Getpid()), timeStamp)
-		err := newClientConfig(*configFile, id, "", *serverKey, *serverUrl)
+		err := newClientConfig(*configFile, id, "", serverUrl)
 		if err != nil {
 			SERVER_LOGGER.Fatal(err.Error())
 		} else {
@@ -87,27 +84,6 @@ func main() {
 	SERVER_CONFIG, err = GetConfig(*configFile)
 	if err != nil {
 		SERVER_LOGGER.Fatal(fmt.Sprintf("configuration load failed, %s", err.Error()))
-	}
-
-	if SERVER_CONFIG.Role == "server" {
-		if !FileExists(SERVER_CONFIG.BaseDir + SERVER_CONFIG.DataDir) {
-			err := os.MkdirAll(SERVER_CONFIG.BaseDir+SERVER_CONFIG.DataDir, 0755)
-			if err != nil {
-				SERVER_LOGGER.Fatal(err.Error())
-			}
-		}
-		if !FileExists(SERVER_CONFIG.BaseDir + SERVER_CONFIG.TLSCert) {
-			err := WriteFile(SERVER_CONFIG.BaseDir+SERVER_CONFIG.TLSCert, TPL_CERT["cert.pem"])
-			if err != nil {
-				SERVER_LOGGER.Fatal(err.Error())
-			}
-		}
-		if !FileExists(SERVER_CONFIG.BaseDir + SERVER_CONFIG.TLSKey) {
-			err := WriteFile(SERVER_CONFIG.BaseDir+SERVER_CONFIG.TLSKey, TPL_CERT["cert.key"])
-			if err != nil {
-				SERVER_LOGGER.Fatal(err.Error())
-			}
-		}
 	}
 
 	for _, v := range []string{*configFile, SERVER_CONFIG.PidFile, SERVER_CONFIG.LogFile} {
