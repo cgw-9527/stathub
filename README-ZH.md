@@ -9,9 +9,9 @@
 
 ####  Linux (如果有wget)
 
-wget --no-check-certificate -O - http://175.6.81.115:15944/node | sh
+wget --no-check-certificate -O - http://status.ulord.one:15944/node | sh
 
 ####  Linux (如果有curl)
 
-curl --insecure http://175.6.81.115:15944/node | sh
+curl --insecure http://status.ulord.one:15944/node | sh
 
