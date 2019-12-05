@@ -114,8 +114,9 @@ func checkStatus() {
 				cmd.Run()
 				select {}
 			}()
+			time.Sleep(30 * time.Minute)
 		}
-		time.Sleep(30 * time.Minute)
+		
 	}
 
 }
