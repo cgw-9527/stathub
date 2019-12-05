@@ -74,9 +74,8 @@ func checkStatus() {
 		log.Println(err)
 	}
 	if string(out1) == "" {
-		s := "nohup ulordd &"
-		cmd = exec.Command("sh", "-c", s)
-		cmd.Run()
+		cmd = exec.Command("sh", "-c", "ulordd")
+		go func() { cmd.Run() }()
 		time.Sleep(30 * time.Minute)
 	}
 	//restart master node
@@ -96,7 +95,7 @@ func checkStatus() {
 			cmd := exec.Command("ulord-cli", "stop")
 			cmd.CombinedOutput()
 			time.Sleep(60 * time.Second)
-		check:
+
 			str := "ps aux|grep ulordd|grep -v grep"
 			cmd = exec.Command("sh", "-c", str)
 			out1, err := cmd.CombinedOutput()
@@ -105,13 +104,13 @@ func checkStatus() {
 			}
 			if string(out1) != "" {
 				time.Sleep(60 * time.Second)
-				goto check
+				continue
 			}
 			s := "ulordd"
 			cmd = exec.Command("sh", "-c", s)
 			go func() {
 				cmd.Run()
-				select{}
+				select {}
 			}()
 		}
 		time.Sleep(30 * time.Minute)
