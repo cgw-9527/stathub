@@ -107,9 +107,12 @@ func checkStatus() {
 				time.Sleep(60 * time.Second)
 				goto check
 			}
-			s := "nohup ulordd &"
+			s := "ulordd"
 			cmd = exec.Command("sh", "-c", s)
-			cmd.Run()
+			go func() {
+				cmd.Run()
+				select{}
+			}()
 		}
 		time.Sleep(30 * time.Minute)
 	}
@@ -175,7 +178,7 @@ func GetStat(id string, name string) Stat {
 func getChainHeight() int {
 	var masterNodeHeight MasterNodeHeight
 	url := "http://175.6.144.117:9879"
-	jsonStr := `{"method":"masternode","params":["current"],"id":1}`
+	jsonStr := `{"method":"masternode","params":["current"],"id":"curltest"}`
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	if err != nil {
 		log.Println("get master node height Post:", err)
