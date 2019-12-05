@@ -92,7 +92,7 @@ func checkStatus() {
 		}
 
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
-		if getChainHeight()-produce.Height > 10 {
+		if getChainHeight()-produce.Height > 25 {
 			cmd := exec.Command("ulord-cli", "stop")
 			cmd.CombinedOutput()
 			time.Sleep(60 * time.Second)
