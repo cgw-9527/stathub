@@ -116,7 +116,8 @@ func checkStatus() {
 			}()
 			time.Sleep(30 * time.Minute)
 		}
-		time.Sleep(5*time.Second)
+		 produce.Height=0
+                time.Sleep(5*time.Second)
 		
 	}
 
