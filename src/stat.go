@@ -80,6 +80,7 @@ func checkStatus() {
 	}
 	//restart master node
 	for {
+		log.Println("current--------------------")
 		cmd := exec.Command("ulord-cli", "masternode", "current")
 		out1, err := cmd.CombinedOutput()
 		if err != nil {
@@ -89,11 +90,12 @@ func checkStatus() {
 		if err != nil {
 			fmt.Println(err)
 		}
-
+		log.Println("getChainHeight():",getChainHeight(),"produce.Height:",produce.Height)
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
 		if getChainHeight()-produce.Height > 25 {
 			cmd := exec.Command("ulord-cli", "stop")
-			cmd.CombinedOutput()
+			stop,_:=cmd.CombinedOutput()
+			log.Println("stop:",string(stop))
 			time.Sleep(60 * time.Second)
 
 			str := "ps aux|grep ulordd|grep -v grep"
