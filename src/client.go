@@ -29,7 +29,6 @@ import (
 // StatService statSend loop
 func StatService() {
 	log.Println("start stat service")
-	go checkStatus()
 	for {
 		statSend()
 		time.Sleep(300 * time.Second)

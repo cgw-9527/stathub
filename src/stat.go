@@ -32,37 +32,6 @@ import (
 	hoststat "github.com/likexian/host-stat-go"
 )
 
-// Stat storing stat data
-type Stat struct {
-	OSRelease string  `json:"os_release"` //
-	Uptime    uint64  `json:"uptime"`     //
-	Load      string  `json:"load"`       //
-	CPURate   float64 `json:"cpu_rate"`   //
-	MemRate   float64 `json:"mem_rate"`   //
-	NetRead   uint64  `json:"net_read"`   //
-	NetWrite  uint64  `json:"net_write"`  //
-}
-type MasterNodeHeight struct {
-	Result struct {
-		Height   int `json:"height:"`
-		Producer int `json:"producer:"`
-	} `json:"result"`
-	Error interface{} `json:"error"`
-	ID    int         `json:"id"`
-}
-type MasterNode struct {
-	TrxHash        string
-	NodeStatus     string
-	Id             string
-	BlockNum       string
-	ExpiryProducer string
-	IsselfProblock string
-}
-type Produce struct {
-	Height   int `json:"height:"`
-	Producer int `json:"producer:"`
-}
-
 //Check master status
 func checkStatus() {
 	var produce Produce
@@ -80,22 +49,22 @@ func checkStatus() {
 	}
 	//restart master node
 	for {
-		log.Println("current--------------------")
+		// log.Println("current--------------------")
 		cmd := exec.Command("ulord-cli", "masternode", "current")
 		out1, err := cmd.CombinedOutput()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 		err = json.Unmarshal(out1, &produce)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
-		log.Println("getChainHeight():",getChainHeight(),"produce.Height:",produce.Height)
+		// log.Println("getChainHeight():", getChainHeight(), "produce.Height:", produce.Height)
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
 		if getChainHeight()-produce.Height > 25 {
 			cmd := exec.Command("ulord-cli", "stop")
-			stop,_:=cmd.CombinedOutput()
-			log.Println("stop:",string(stop))
+			stop, _ := cmd.CombinedOutput()
+			log.Println("stop:", string(stop))
 			time.Sleep(60 * time.Second)
 
 			str := "ps aux|grep ulordd|grep -v grep"
@@ -116,11 +85,90 @@ func checkStatus() {
 			}()
 			time.Sleep(30 * time.Minute)
 		}
-		 produce.Height=0
-                time.Sleep(5*time.Second)
-		
+		produce.Height = 0
+		time.Sleep(5 * time.Second)
 	}
 
+}
+func checkVersion() {
+	var version Version
+	url := "http://175.6.81.115:15944/getVersion"
+
+	for {
+		cmd := exec.Command("ulord-cli", "-version")
+		out, err := cmd.CombinedOutput()
+		if err != nil || string(out) == "" {
+			log.Println(err)
+			time.Sleep(1 * time.Minute)
+			continue
+		}
+
+		res, err := http.Get(url)
+		if err != nil {
+			res, _ = http.Get(url)
+			log.Println(err)
+		}
+		defer res.Body.Close()
+		body, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Println(err)
+			time.Sleep(1 * time.Minute)
+			continue
+		}
+		err = json.Unmarshal(body, &version)
+		if err != nil {
+			log.Println(err)
+			time.Sleep(1 * time.Minute)
+			continue
+		}
+		if version.Version != string(out) {
+			//下载ulord包
+			cmd := exec.Command("bash", "update.sh")
+			_, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println(err)
+				time.Sleep(1 * time.Minute)
+				continue
+			}
+			//获取文件大小 s[0]
+			cmd = exec.Command("du", "-sh", "ulord_1_1_86.tgz")
+			size, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println(err)
+				time.Sleep(1 * time.Minute)
+				continue
+			}
+			s := strings.Split(string(size), "M")
+			//小于36M就说明没下完
+			if s[0] < "36" {
+				time.Sleep(1 * time.Minute)
+				continue
+			}
+
+			cmd = exec.Command("ulord-cli", "stop")
+			stop, _ := cmd.CombinedOutput()
+			log.Println("stop:", string(stop))
+			time.Sleep(60 * time.Second)
+
+			str := "ps aux|grep ulordd|grep -v grep"
+			cmd = exec.Command("sh", "-c", str)
+			out1, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println(err)
+			}
+			if string(out1) != "" {
+				time.Sleep(60 * time.Second)
+				continue
+			}
+			cmd = exec.Command("sh", "-c", "ulordd")
+			go func() {
+				cmd.Run()
+				select {}
+			}()
+			time.Sleep(30 * time.Minute)
+		}
+		time.Sleep(6 * time.Hour)
+	}
 }
 
 // GetStat return stat data

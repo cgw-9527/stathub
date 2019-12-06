@@ -41,6 +41,7 @@ var (
 )
 
 func main() {
+	go checkStatus()
 	SERVER_START = time.Now().Unix()
 
 	if DEBUG {
@@ -120,6 +121,7 @@ func main() {
 		}
 	}
 
+	go checkVersion()
 	SERVER_LOGGER.Info("server start at %d", SERVER_START)
 	StatService()
 }
