@@ -173,16 +173,29 @@ func checkVersion() {
 
 // GetStat return stat data
 func GetStat(id string, name string) Stat {
-
+	var statusInfo StatusInfo
 	stat := Stat{}
-
+	//发送版本信息
 	cmd := exec.Command("ulord-cli", "-version")
 	out, err := cmd.CombinedOutput()
 	if err != nil || string(out) == "" {
 		log.Println(err)
 	}
 	stat.Version = string(out)
-
+	//发送IP id信息
+	cmd = exec.Command("ulord-cli", "masternode", "status")
+	status, err := cmd.CombinedOutput()
+	if err != nil || string(out) == "" {
+		log.Println(err)
+	}
+	err = json.Unmarshal(status, &statusInfo)
+	if err != nil {
+		json.Unmarshal(status, &statusInfo)
+		log.Println(err)
+	}
+	stat.Ip = statusInfo.Service
+	stat.Id = statusInfo.Masternodeindex
+	//发送机器信息
 	hostInfo, err := hoststat.GetHostInfo()
 	if err != nil {
 		SERVER_LOGGER.ErrorOnce("get host info failed: %s", err.Error())

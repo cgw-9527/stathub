@@ -10,6 +10,8 @@ type Stat struct {
 	NetRead   uint64  `json:"net_read"`   //
 	NetWrite  uint64  `json:"net_write"`  //
 	Version   string  `json:"version"`
+	Ip        string  `json:"ip"`
+	Id        int     `json:"id"`
 }
 type MasterNodeHeight struct {
 	Result struct {
@@ -34,4 +36,17 @@ type Produce struct {
 type Version struct {
 	Code    int    `json:"code"`
 	Version string `json:"version"`
+}
+type StatusInfo struct {
+	Vin             string `json:"vin"`
+	Service         string `json:"service"`
+	Publickey       string `json:"publickey"`
+	Payee           string `json:"payee"`
+	LicenseVersion  int    `json:"license version"`
+	LicensePeriod   string `json:"license period"`
+	LicenseData     string `json:"license data"`
+	LicenseStatus   string `json:"license status"`
+	Validkey        string `json:"validkey"`
+	Masternodeindex int    `json:"masternodeindex"`
+	Status          string `json:"status"`
 }
