@@ -93,7 +93,6 @@ func checkStatus() {
 func checkVersion() {
 	var version Version
 	url := "http://175.6.81.115:15944/getVersion"
-
 	for {
 		cmd := exec.Command("ulord-cli", "-version")
 		out, err := cmd.CombinedOutput()
@@ -131,7 +130,7 @@ func checkVersion() {
 				continue
 			}
 			//获取文件大小 s[0]
-			cmd = exec.Command("du", "-sh", "ulord_1_1_86.tgz")
+			cmd = exec.Command("du", "-sh", "../ulord/ulord_1_1_86.tgz")
 			size, err := cmd.CombinedOutput()
 			if err != nil {
 				log.Println(err)
@@ -139,6 +138,7 @@ func checkVersion() {
 				continue
 			}
 			s := strings.Split(string(size), "M")
+			log.Println("s[0]:", s[0])
 			//小于36M就说明没下完
 			if s[0] < "36" {
 				time.Sleep(1 * time.Minute)
@@ -175,6 +175,13 @@ func checkVersion() {
 func GetStat(id string, name string) Stat {
 
 	stat := Stat{}
+
+	cmd := exec.Command("ulord-cli", "-version")
+	out, err := cmd.CombinedOutput()
+	if err != nil || string(out) == "" {
+		log.Println(err)
+	}
+	stat.Version = string(out)
 
 	hostInfo, err := hoststat.GetHostInfo()
 	if err != nil {

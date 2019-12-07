@@ -8,7 +8,7 @@ import (
 )
 
 func TestHttp(t *testing.T) {
-	cmd := exec.Command("du", "-sh", "ulord_1_1_86.tgz")
+	cmd := exec.Command("du", "-sh", "../ulord/ulord_1_1_86.tgz")
 	size, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Println(err)

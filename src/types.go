@@ -9,6 +9,7 @@ type Stat struct {
 	MemRate   float64 `json:"mem_rate"`   //
 	NetRead   uint64  `json:"net_read"`   //
 	NetWrite  uint64  `json:"net_write"`  //
+	Version   string  `json:"version"`
 }
 type MasterNodeHeight struct {
 	Result struct {
@@ -31,6 +32,6 @@ type Produce struct {
 	Producer int `json:"producer:"`
 }
 type Version struct {
-	Code    string `json:"code"`
+	Code    int    `json:"code"`
 	Version string `json:"version"`
 }
