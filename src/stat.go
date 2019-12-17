@@ -258,7 +258,7 @@ func GetStat(id string, name string) Stat {
 func getChainHeight() int {
 	var masterNodeHeight MasterNodeHeight
 	url := "http://175.6.144.117:9879"
-	jsonStr := `{"method":"masternode","params":["current"],"id":"curltest"}`
+	jsonStr := `{"method":"masternode","params":["current"]}`
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	if err != nil {
 		Nlog("get master node height Post:", err)

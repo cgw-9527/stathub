@@ -19,7 +19,7 @@ type MasterNodeHeight struct {
 		Producer int `json:"producer:"`
 	} `json:"result"`
 	Error interface{} `json:"error"`
-	ID    int         `json:"id"`
+	ID    interface{} `json:"id"`
 }
 type MasterNode struct {
 	TrxHash        string

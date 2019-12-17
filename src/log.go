@@ -70,7 +70,6 @@ func rotateCreaten() (*rotatelogs.RotateLogs, error) {
 
 //初始化日志
 func InitLogger() {
-
 	writer, err := rotateCreaten()
 	if err != nil {
 		log.Errorf("config local file system logger error. %v", errors.WithStack(err))
