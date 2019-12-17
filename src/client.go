@@ -42,15 +42,15 @@ func statSend() {
 	data := simplejson.New(stat)
 	result, err := data.Dumps()
 	if err != nil {
-		log.Println("get stat failed: %s", err.Error())
+		Nlog("statsend struct=>string: %v", err.Error())
 		return
 	}
 
-	log.Println("get stat data: %s", result)
+	log.Println("get stat data: %v", result)
 	for i := 0; i < 3; i++ {
 		err := httpSend(SERVER_CONFIG.ServerUrl, result)
 		if err != nil {
-			log.Println("send stat failed, %s", err.Error())
+			Nlog("send stat failed, %v", err.Error())
 			time.Sleep(3 * time.Second)
 		} else {
 			log.Println("send stat to server successful")

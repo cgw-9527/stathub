@@ -1,18 +1,33 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
-	"os/exec"
-	"strings"
+	"net/http"
 	"testing"
+	"time"
 )
 
 func TestHttp(t *testing.T) {
-	cmd := exec.Command("du", "-sh", "../ulord/ulord_1_1_86.tgz")
-	size, err := cmd.CombinedOutput()
+	url := "http://175.6.81.115:15944/getVersion"
+	type Version struct {
+		Code    int    `json:"code"`
+		Version string `json:"version"`
+	}
+	var version Version
+	res, err := http.Get(url)
 	if err != nil {
+		res, _ = http.Get(url)
 		log.Println(err)
 	}
-	s := strings.Split(string(size), "M")
-	log.Println(s[0])
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Println(err)
+		time.Sleep(1 * time.Minute)
+
+	}
+	err = json.Unmarshal(body, &version)
+	log.Println(version.Version)
 }
