@@ -86,7 +86,7 @@ func checkStatus() {
 			time.Sleep(30 * time.Minute)
 		}
 		produce.Height = 0
-		time.Sleep(5 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 
 }
@@ -263,6 +263,7 @@ func getChainHeight() int {
 	if err != nil {
 		Nlog("get master node height Post:", err)
 	}
+	req.Close = true
 	req.Header.Set("Content-ype", "text/plain;")
 	req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
 
@@ -270,6 +271,7 @@ func getChainHeight() int {
 	resp, err := client.Do(req)
 	if err != nil {
 		Nlog("get master node height resp:", err)
+		return 0
 	}
 	defer resp.Body.Close()
 	data, _ := ioutil.ReadAll(resp.Body)

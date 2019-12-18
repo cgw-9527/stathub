@@ -58,19 +58,6 @@ func float64ToString(in float64) string {
 	s1 := strconv.FormatFloat(in, 'f', -1, 64)
 	return s1
 }
-func stringToFloat64(in string) float64 {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Println("[[Recovery] panic recovered:", err)
-		}
-	}()
-	count, err := strconv.ParseFloat(in, 64)
-	if err != nil {
-		log.Fatalln("Failure of String Conversion.")
-		panic(err)
-	}
-	return count
-}
 
 //获取engine对象
 func getEngine() *xorm.Engine {
