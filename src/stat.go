@@ -49,7 +49,6 @@ func checkStatus() {
 	}
 	//restart master node
 	for {
-		// log.Println("current--------------------")
 		cmd := exec.Command("ulord-cli", "masternode", "current")
 		out1, err := cmd.CombinedOutput()
 		if err != nil {
@@ -59,23 +58,40 @@ func checkStatus() {
 		if err != nil {
 			Nlog("checkstatus json:", err)
 		}
-		// log.Println("getChainHeight():", getChainHeight(), "produce.Height:", produce.Height)
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
 		if getChainHeight()-produce.Height > 25 {
-			cmd := exec.Command("ulord-cli", "stop")
+			//截取进程编号，如果ulord-cli stop不能停止ulord程序，则通过比较进程号来杀掉进程
+			str := "ps aux|grep ulordd|grep -v grep"
+			cmd := exec.Command("sh", "-c", str)
+			out1, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Println("checkstatus ulordd 2", err)
+			}
+			pid := strings.Split(string(out1), "\n")
+			pid = strings.Split(pid[1], "   ")
+			pid = strings.Split(pid[1], " ")
+			//原来的进程编号 pid[2]
+
+			cmd = exec.Command("ulord-cli", "stop")
 			stop, _ := cmd.CombinedOutput()
 			log.Println("stop:", string(stop))
 			time.Sleep(60 * time.Second)
 
-			str := "ps aux|grep ulordd|grep -v grep"
 			cmd = exec.Command("sh", "-c", str)
-			out1, err := cmd.CombinedOutput()
+			out, err := cmd.CombinedOutput()
 			if err != nil {
 				Nlog("checkstatus ulordd 2", err)
 			}
-			if string(out1) != "" {
+			if string(out) != "" {
 				time.Sleep(60 * time.Second)
-				continue
+				newPid := strings.Split(string(out), "\n")
+				newPid = strings.Split(newPid[1], "   ")
+				newPid = strings.Split(newPid[1], " ")
+				if pid[2] == newPid[2] {
+					cmd = exec.Command("kill", pid[2])
+					cmd.CombinedOutput()
+				}
+
 			}
 			s := "ulordd"
 			cmd = exec.Command("sh", "-c", s)

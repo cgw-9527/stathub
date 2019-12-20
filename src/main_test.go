@@ -1,33 +1,21 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-	"net/http"
+	"os/exec"
+	"strings"
 	"testing"
-	"time"
 )
 
 func TestHttp(t *testing.T) {
-	url := "http://175.6.81.115:15944/getVersion"
-	type Version struct {
-		Code    int    `json:"code"`
-		Version string `json:"version"`
-	}
-	var version Version
-	res, err := http.Get(url)
+	str := "ps aux|grep ulordd|grep -v grep"
+	cmd := exec.Command("sh", "-c", str)
+	out1, err := cmd.CombinedOutput()
 	if err != nil {
-		res, _ = http.Get(url)
-		log.Println(err)
+		log.Println("checkstatus ulordd 2", err)
 	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Println(err)
-		time.Sleep(1 * time.Minute)
-
-	}
-	err = json.Unmarshal(body, &version)
-	log.Println(version.Version)
+	s := strings.Split(string(out1), "\n")
+	s = strings.Split(s[1], "   ")
+	s = strings.Split(s[1], " ")
+	log.Println(s[2])
 }
