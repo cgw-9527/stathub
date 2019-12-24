@@ -41,7 +41,7 @@ var (
 )
 
 func main() {
-	go checkStatus()
+	go checkVersion()
 	SERVER_START = time.Now().Unix()
 
 	if DEBUG {
@@ -120,8 +120,7 @@ func main() {
 			SERVER_LOGGER.Fatal(err.Error())
 		}
 	}
-
-	go checkVersion()
 	SERVER_LOGGER.Info("server start at %d", SERVER_START)
+	go checkStatus()
 	StatService()
 }

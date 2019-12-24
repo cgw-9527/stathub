@@ -47,11 +47,11 @@ func statSend() {
 	}
 
 	log.Println("get stat data: %v", result)
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		err := httpSend(SERVER_CONFIG.ServerUrl, result)
 		if err != nil {
 			Nlog("send stat failed, %v", err.Error())
-			time.Sleep(3 * time.Second)
+			time.Sleep(30 * time.Second)
 		} else {
 			log.Println("send stat to server successful")
 			break

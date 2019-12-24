@@ -37,7 +37,7 @@ func httpSend(server, stat string) (err error) {
 	request.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{
-		Timeout: time.Duration(30 * time.Second),
+		Timeout: time.Duration(12 * time.Second),
 	}
 
 	response, err := client.Do(request)

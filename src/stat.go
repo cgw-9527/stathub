@@ -69,7 +69,10 @@ func checkStatus() {
 			}
 			pid := strings.Split(string(out1), "\n")
 			pid = strings.Split(pid[1], "   ")
-			pid = strings.Split(pid[1], " ")
+			if len(pid) > 1 {
+				pid = strings.Split(pid[1], " ")
+			}
+
 			//原来的进程编号 pid[2]
 
 			cmd = exec.Command("ulord-cli", "stop")
@@ -80,16 +83,18 @@ func checkStatus() {
 			cmd = exec.Command("sh", "-c", str)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
-				Nlog("checkstatus ulordd 2", err)
+				Nlog("checkstatus ulordd 3", err)
 			}
 			if string(out) != "" {
 				time.Sleep(60 * time.Second)
 				newPid := strings.Split(string(out), "\n")
-				newPid = strings.Split(newPid[1], "   ")
-				newPid = strings.Split(newPid[1], " ")
-				if pid[2] == newPid[2] {
-					cmd = exec.Command("kill", pid[2])
-					cmd.CombinedOutput()
+				if len(newPid) > 1 {
+					newPid = strings.Split(newPid[1], "   ")
+					newPid = strings.Split(newPid[1], " ")
+					if pid[2] == newPid[2] {
+						cmd = exec.Command("kill", pid[2])
+						cmd.CombinedOutput()
+					}
 				}
 
 			}
@@ -107,7 +112,6 @@ func checkStatus() {
 
 }
 func checkVersion() {
-	time.Sleep(1 * time.Minute)
 	var version Version
 	url := "http://175.6.81.115:15944/getVersion"
 	for {
@@ -136,6 +140,7 @@ func checkVersion() {
 			continue
 		}
 		if version.Version != string(out) {
+			str := "ps aux|grep ulordd|grep -v grep"
 			//下载ulord包
 			cmd := exec.Command("bash", "update.sh")
 			_, err := cmd.CombinedOutput()
@@ -160,20 +165,39 @@ func checkVersion() {
 				continue
 			}
 
-			cmd = exec.Command("ulord-cli", "stop")
-			stop, _ := cmd.CombinedOutput()
-			log.Println("stop:", string(stop))
-			time.Sleep(60 * time.Second)
-
-			str := "ps aux|grep ulordd|grep -v grep"
 			cmd = exec.Command("sh", "-c", str)
 			out1, err := cmd.CombinedOutput()
 			if err != nil {
+				log.Println("checkstatus ulordd 2", err)
+			}
+			pid := strings.Split(string(out1), "\n")
+			pid = strings.Split(pid[1], "   ")
+			if len(pid) > 1 {
+				pid = strings.Split(pid[1], " ")
+			}
+
+			cmd = exec.Command("ulord-cli", "stop")
+			stop, _ := cmd.CombinedOutput()
+			log.Println(string(stop))
+			time.Sleep(60 * time.Second)
+
+			cmd = exec.Command("sh", "-c", str)
+			out3, err := cmd.CombinedOutput()
+			if err != nil {
 				Nlog("checkversion ulordd", err)
 			}
-			if string(out1) != "" {
+			if string(out3) != "" {
 				time.Sleep(60 * time.Second)
-				continue
+				newPid := strings.Split(string(out), "\n")
+				if len(newPid) > 1 {
+					newPid = strings.Split(newPid[1], "   ")
+					newPid = strings.Split(newPid[1], " ")
+					if pid[2] == newPid[2] {
+						cmd = exec.Command("kill", pid[2])
+						cmd.CombinedOutput()
+					}
+				}
+
 			}
 			cmd = exec.Command("sh", "-c", "ulordd")
 			go func() {
@@ -274,6 +298,7 @@ func GetStat(id string, name string) Stat {
 func getChainHeight() int {
 	var masterNodeHeight MasterNodeHeight
 	url := "http://175.6.144.117:9879"
+	url1 := "http://175.6.145.36:9879"
 	jsonStr := `{"method":"masternode","params":["current"]}`
 	req, err := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	if err != nil {
@@ -286,8 +311,12 @@ func getChainHeight() int {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		req, _ = http.NewRequest("POST", url1, strings.NewReader(jsonStr))
+		req.Close = true
+		req.Header.Set("Content-ype", "text/plain;")
+		req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
+		resp, _ = client.Do(req)
 		Nlog("get master node height resp:", err)
-		return 0
 	}
 	defer resp.Body.Close()
 	data, _ := ioutil.ReadAll(resp.Body)
