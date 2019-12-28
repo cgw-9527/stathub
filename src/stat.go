@@ -60,26 +60,19 @@ func checkStatus() {
 		}
 		//If the current machine falls behind 6 blocks on the chain, restart the machine
 		if getChainHeight()-produce.Height > 25 {
-			//截取进程编号，如果ulord-cli stop不能停止ulord程序，则通过比较进程号来杀掉进程
-			str := "ps aux|grep ulordd|grep -v grep"
-			cmd := exec.Command("sh", "-c", str)
-			out1, err := cmd.CombinedOutput()
+			//停止之前获取进程编号,比较两个编号是否一致
+			cmd := exec.Command("pidof", "ulordd")
+			pid, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Println("checkstatus ulordd 2", err)
+				Nlog("checkstatus get old pid:", err)
 			}
-			pid := strings.Split(string(out1), "\n")
-			pid = strings.Split(pid[1], "   ")
-			if len(pid) > 1 {
-				pid = strings.Split(pid[1], " ")
-			}
-
-			//原来的进程编号 pid[2]
 
 			cmd = exec.Command("ulord-cli", "stop")
 			stop, _ := cmd.CombinedOutput()
 			log.Println("stop:", string(stop))
 			time.Sleep(60 * time.Second)
 
+			str := "ps aux|grep ulordd|grep -v grep"
 			cmd = exec.Command("sh", "-c", str)
 			out, err := cmd.CombinedOutput()
 			if err != nil {
@@ -87,16 +80,17 @@ func checkStatus() {
 			}
 			if string(out) != "" {
 				time.Sleep(60 * time.Second)
-				newPid := strings.Split(string(out), "\n")
-				if len(newPid) > 1 {
-					newPid = strings.Split(newPid[1], "   ")
-					newPid = strings.Split(newPid[1], " ")
-					if pid[2] == newPid[2] {
-						cmd = exec.Command("kill", pid[2])
-						cmd.CombinedOutput()
-					}
+				cmd := exec.Command("pidof", "ulordd")
+				newPid, err := cmd.CombinedOutput()
+				if err != nil {
+					Nlog("checkstatus get new pid:", err)
 				}
-
+				nPid := strings.Split(string(newPid), "\n")
+				oPid := strings.Split(string(pid), "\n")
+				if nPid[0] == oPid[0] {
+					cmd = exec.Command("kill", oPid[0])
+					cmd.CombinedOutput()
+				}
 			}
 			s := "ulordd"
 			cmd = exec.Command("sh", "-c", s)
@@ -165,15 +159,10 @@ func checkVersion() {
 				continue
 			}
 
-			cmd = exec.Command("sh", "-c", str)
-			out1, err := cmd.CombinedOutput()
+			cmd = exec.Command("pidof", "ulordd")
+			pid, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Println("checkstatus ulordd 2", err)
-			}
-			pid := strings.Split(string(out1), "\n")
-			pid = strings.Split(pid[1], "   ")
-			if len(pid) > 1 {
-				pid = strings.Split(pid[1], " ")
+				Nlog("checkstatus get old pid:", err)
 			}
 
 			cmd = exec.Command("ulord-cli", "stop")
@@ -188,14 +177,16 @@ func checkVersion() {
 			}
 			if string(out3) != "" {
 				time.Sleep(60 * time.Second)
-				newPid := strings.Split(string(out), "\n")
-				if len(newPid) > 1 {
-					newPid = strings.Split(newPid[1], "   ")
-					newPid = strings.Split(newPid[1], " ")
-					if pid[2] == newPid[2] {
-						cmd = exec.Command("kill", pid[2])
-						cmd.CombinedOutput()
-					}
+				cmd := exec.Command("pidof", "ulordd")
+				newPid, err := cmd.CombinedOutput()
+				if err != nil {
+					Nlog("checkstatus get new pid:", err)
+				}
+				nPid := strings.Split(string(newPid), "\n")
+				oPid := strings.Split(string(pid), "\n")
+				if nPid[0] == oPid[0] {
+					cmd = exec.Command("kill", oPid[0])
+					cmd.CombinedOutput()
 				}
 
 			}
