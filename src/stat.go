@@ -80,6 +80,7 @@ func checkStatus() {
 			}
 			if string(out) != "" {
 				time.Sleep(60 * time.Second)
+			kill:
 				cmd := exec.Command("pidof", "ulordd")
 				newPid, err := cmd.CombinedOutput()
 				if err != nil {
@@ -88,8 +89,18 @@ func checkStatus() {
 				nPid := strings.Split(string(newPid), "\n")
 				oPid := strings.Split(string(pid), "\n")
 				if nPid[0] == oPid[0] {
-					cmd = exec.Command("kill", oPid[0])
+					cmd = exec.Command("kill", nPid[0])
 					cmd.CombinedOutput()
+				}
+				//确保进程被杀死！才启动程序
+				time.Sleep(5 * time.Second)
+				cmd = exec.Command("pidof", "ulordd")
+				newPid, err = cmd.CombinedOutput()
+				if err != nil {
+					Nlog("checkstatus get new pid 2:", err)
+				}
+				if string(newPid) != "" {
+					goto kill
 				}
 			}
 			s := "ulordd"
@@ -177,6 +188,7 @@ func checkVersion() {
 			}
 			if string(out3) != "" {
 				time.Sleep(60 * time.Second)
+			kill:
 				cmd := exec.Command("pidof", "ulordd")
 				newPid, err := cmd.CombinedOutput()
 				if err != nil {
@@ -185,10 +197,19 @@ func checkVersion() {
 				nPid := strings.Split(string(newPid), "\n")
 				oPid := strings.Split(string(pid), "\n")
 				if nPid[0] == oPid[0] {
-					cmd = exec.Command("kill", oPid[0])
+					cmd = exec.Command("kill", nPid[0])
 					cmd.CombinedOutput()
 				}
-
+				//确保进程被杀死！才启动程序
+				time.Sleep(5 * time.Second)
+				cmd = exec.Command("pidof", "ulordd")
+				newPid, err = cmd.CombinedOutput()
+				if err != nil {
+					Nlog("checkstatus get new pid 2:", err)
+				}
+				if string(newPid) != "" {
+					goto kill
+				}
 			}
 			cmd = exec.Command("sh", "-c", "ulordd")
 			go func() {
@@ -299,7 +320,9 @@ func getChainHeight() int {
 	req.Header.Set("Content-ype", "text/plain;")
 	req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
 
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		req, _ = http.NewRequest("POST", url1, strings.NewReader(jsonStr))
@@ -308,6 +331,9 @@ func getChainHeight() int {
 		req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
 		resp, _ = client.Do(req)
 		Nlog("get master node height resp:", err)
+	}
+	if resp == nil {
+		return 0
 	}
 	defer resp.Body.Close()
 	data, _ := ioutil.ReadAll(resp.Body)

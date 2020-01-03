@@ -20,6 +20,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -46,7 +47,7 @@ func statSend() {
 		return
 	}
 
-	log.Println("get stat data: %v", result)
+	fmt.Sprintf("get stat data: %v", result)
 	for i := 0; i < 2; i++ {
 		err := httpSend(SERVER_CONFIG.ServerUrl, result)
 		if err != nil {

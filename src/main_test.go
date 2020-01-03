@@ -1,16 +1,30 @@
 package main
 
 import (
-	"log"
-	"os/exec"
+	"net/http"
+	"strings"
 	"testing"
+	"time"
 )
 
 func TestHttp(t *testing.T) {
-	cmd := exec.Command("pidof", "ulordd")
-	out1, err := cmd.CombinedOutput()
+	url := "http://175.6.144.117:9879"
+	jsonStr := `{"method":"masternode","params":["current"]}`
+	req, err := http.NewRequest("POST", url, strings.NewReader(jsonStr))
 	if err != nil {
-		log.Println("checkstatus ulordd 2", err)
+		Nlog("get master node height Post:", err)
 	}
-	log.Println(string(out1) + "")
+	req.Close = true
+	req.Header.Set("Content-ype", "text/plain;")
+	req.Header.Add("Authorization", "Basic  VWxvcmQwMzpVbG9yZDAz")
+
+	client := &http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+	resp, err := client.Do(req)
+	resp = nil
+	if resp == nil {
+		return
+	}
+	defer resp.Body.Close()
 }
